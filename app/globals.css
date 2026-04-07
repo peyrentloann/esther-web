@@ -1,60 +1,102 @@
 @import "tailwindcss";
 
-:root {
-  --background: #fdf9f4;
-  --foreground: #1c1c19;
+@theme {
+  /* ── Couleurs ── */
+  --color-primary: #153328;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #2c4a3e;
+  --color-on-primary-container: #98b9a9;
+  --color-primary-fixed: #c8eada;
+  --color-primary-fixed-dim: #adcebe;
+  --color-on-primary-fixed: #012016;
+  --color-on-primary-fixed-variant: #2f4d41;
+  --color-inverse-primary: #adcebe;
+
+  --color-secondary: #874f48;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fdb5aa;
+  --color-on-secondary-container: #79443d;
+  --color-secondary-fixed: #ffdad5;
+  --color-secondary-fixed-dim: #fdb5aa;
+  --color-on-secondary-fixed: #360e0a;
+  --color-on-secondary-fixed-variant: #6b3832;
+
+  --color-tertiary: #3e2a00;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #5a3f00;
+  --color-on-tertiary-container: #d6aa55;
+  --color-tertiary-fixed: #ffdea6;
+  --color-tertiary-fixed-dim: #eec068;
+  --color-on-tertiary-fixed: #271900;
+  --color-on-tertiary-fixed-variant: #5d4200;
+
+  --color-surface: #fdf9f4;
+  --color-surface-dim: #ddd9d5;
+  --color-surface-bright: #fdf9f4;
+  --color-surface-tint: #466558;
+  --color-surface-variant: #e6e2dd;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f7f3ee;
+  --color-surface-container: #f1ede8;
+  --color-surface-container-high: #ebe8e3;
+  --color-surface-container-highest: #e6e2dd;
+  --color-on-surface: #1c1c19;
+  --color-on-surface-variant: #414845;
+  --color-inverse-surface: #31302d;
+  --color-inverse-on-surface: #f4f0eb;
+
+  --color-background: #fdf9f4;
+  --color-on-background: #1c1c19;
+
+  --color-outline: #727974;
+  --color-outline-variant: #c1c8c3;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  /* ── Typographie ── */
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-noto-serif), Georgia, serif;
+  --font-headline: var(--font-noto-serif), Georgia, serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-label: var(--font-inter), system-ui, sans-serif;
+
+  /* ── Border radius ── */
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* ── Transitions ── */
+  --transition-duration-400: 400ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-serif: var(--font-noto-serif);
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Selection */
-::selection {
-  background-color: #c8eada;
-  color: #012016;
-}
-
-/* Smooth scroll */
+/* ── Base ── */
 html {
   scroll-behavior: smooth;
 }
 
-/* Reveal animation */
+body {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--color-primary-fixed);
+  color: var(--color-on-primary-fixed);
+}
+
+/* ── Reveal animation ── */
 @keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .reveal {
   animation: reveal-up 0.6s ease-out forwards;
-}
-
-/* Botanical overlay texture */
-.botanical-overlay {
-  position: relative;
-}
-.botanical-overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23153328' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  pointer-events: none;
 }

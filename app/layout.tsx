@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Serif } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -34,9 +32,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${notoSerif.variable}`}>
       <body className="bg-surface text-on-surface antialiased">
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        {children}
         <Toaster position="bottom-right" richColors />
       </body>
     </html>
