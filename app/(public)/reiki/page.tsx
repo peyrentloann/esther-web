@@ -11,10 +11,10 @@ const BENEFITS = [
 ];
 
 const TOOLS = [
-  { title: "Cristaux", desc: "Pierres précieuses sélectionnées pour ancrer et purifier vos énergies spécifiques.", img: "/esther/reiki-ambiance/cristaux.jpg" },
-  { title: "Bols chantants", desc: "Fréquences sonores pour harmoniser les cellules et apaiser le système nerveux.", img: "/esther/reiki-ambiance/bols.jpg" },
-  { title: "Pendule", desc: "Outil de diagnostic pour identifier avec précision les blocages des chakras.", img: "/esther/reiki-ambiance/pendule.jpg" },
-  { title: "Huiles essentielles", desc: "Aromathérapie ciblée pour soutenir l'ouverture émotionnelle durant la séance.", img: "/esther/reiki-ambiance/huiles.jpg" },
+  { title: "Cristaux", desc: "Pierres précieuses sélectionnées pour ancrer et purifier vos énergies spécifiques.", icon: "💎", bg: "bg-primary-fixed/40" },
+  { title: "Bols chantants", desc: "Fréquences sonores pour harmoniser les cellules et apaiser le système nerveux.", icon: "🔔", bg: "bg-tertiary-fixed/40" },
+  { title: "Pendule", desc: "Outil de diagnostic pour identifier avec précision les blocages des chakras.", icon: "🔮", bg: "bg-primary-fixed/20" },
+  { title: "Huiles essentielles", desc: "Aromathérapie ciblée pour soutenir l'ouverture émotionnelle durant la séance.", icon: "🌿", bg: "bg-tertiary-fixed/20" },
 ];
 
 const TESTIMONIALS = [
@@ -28,6 +28,9 @@ export default function Reiki() {
     <>
       {/* ── Hero ── */}
       <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary-container to-primary px-6 pt-24">
+        <div className="absolute inset-0 z-0">
+          <Image src="/esther/reiki-ambiance/soin.jpg" alt="" fill className="object-cover opacity-20" />
+        </div>
         <div className="relative z-10 text-center max-w-4xl mx-auto py-24">
           <h1 className="font-serif text-5xl md:text-7xl text-on-primary mb-6 leading-tight tracking-tight">
             Soins Reiki avec{" "}
@@ -126,14 +129,8 @@ export default function Reiki() {
                 key={t.title}
                 className="bg-surface-container-lowest rounded-xl overflow-hidden group"
               >
-                <div className="aspect-square overflow-hidden bg-surface-container-low">
-                  <Image
-                    src={t.img}
-                    alt={t.title}
-                    width={400}
-                    height={400}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
+                <div className={`aspect-square flex items-center justify-center text-6xl ${t.bg} group-hover:scale-110 transition-transform duration-700`}>
+                  {t.icon}
                 </div>
                 <div className="p-6">
                   <h4 className="font-serif text-lg text-primary mb-2">{t.title}</h4>

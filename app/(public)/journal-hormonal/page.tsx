@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const WHAT_INSIDE = [
   { icon: "🌙", title: "Suivi des cycles", desc: "Espace quotidien pour noter ta phase, tes symptômes et ton énergie." },
@@ -55,14 +56,15 @@ export default function JournalHormonal() {
             </div>
           </div>
 
-          {/* Mockup placeholder */}
+          {/* Mockup */}
           <div className="flex justify-center">
-            <div className="w-72 aspect-[3/4] bg-secondary-fixed rounded-3xl shadow-2xl rotate-3 flex items-center justify-center">
-              <p className="font-serif text-secondary text-center italic px-8 text-lg">
-                Journal Hormonal
-                <br />
-                <span className="text-sm text-secondary/60 not-italic">Esther Laframboise</span>
-              </p>
+            <div className="relative w-72 aspect-square rounded-3xl shadow-2xl rotate-3 overflow-hidden">
+              <Image
+                src="/esther/journal-mockup.jpg"
+                alt="Journal Hormonal d'Esther Laframboise"
+                fill
+                className="object-cover"
+              />
             </div>
           </div>
         </div>

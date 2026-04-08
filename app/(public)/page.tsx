@@ -243,7 +243,9 @@ export default function Home() {
             </div>
           </div>
           <div className="md:w-1/2 h-full order-1 md:order-2 bg-on-secondary-fixed/5 p-12 flex justify-center items-center min-h-64">
-            <div className="w-full max-w-sm aspect-[3/4] rounded-xl shadow-2xl rotate-3 bg-surface-container-low" />
+            <div className="relative w-full max-w-sm aspect-square rounded-xl shadow-2xl rotate-3 overflow-hidden">
+              <Image src="/esther/journal-mockup.jpg" alt="Journal Hormonal" fill className="object-cover" />
+            </div>
           </div>
         </div>
       </section>
