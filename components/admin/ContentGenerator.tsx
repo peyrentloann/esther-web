@@ -88,6 +88,12 @@ export default function ContentGenerator() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [galleryOpen, setGalleryOpen] = useState(false);
 
+  // Plan d'action per idea
+  const [planContent, setPlanContent] = useState<Record<number, string>>({});
+  const [loadingPlan, setLoadingPlan] = useState<number | null>(null);
+  const [planOpen, setPlanOpen] = useState<Record<number, boolean>>({});
+  const [planCopied, setPlanCopied] = useState<number | null>(null);
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem(HISTORY_KEY);
@@ -192,6 +198,44 @@ export default function ContentGenerator() {
       localStorage.setItem(GALLERY_KEY, JSON.stringify(updated));
       return updated;
     });
+  }
+
+  async function generatePlan(idea: Idea, index: number) {
+    setPlanOpen((prev) => ({ ...prev, [index]: true }));
+    setPlanContent((prev) => ({ ...prev, [index]: "" }));
+    setLoadingPlan(index);
+    try {
+      const res = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "plan",
+          fields: {
+            titre: idea.titre,
+            type: TYPE_CONFIG[idea.type]?.label || idea.type,
+            caption: idea.caption || "",
+            scriptIdea: idea.scriptIdea || "",
+          },
+        }),
+      });
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        setPlanContent((prev) => ({ ...prev, [index]: (prev[index] || "") + chunk }));
+      }
+    } catch {
+      setPlanContent((prev) => ({ ...prev, [index]: "Erreur lors de la génération du plan." }));
+    }
+    setLoadingPlan(null);
+  }
+
+  async function copyPlan(index: number) {
+    await navigator.clipboard.writeText(planContent[index] || "");
+    setPlanCopied(index);
+    setTimeout(() => setPlanCopied(null), 2000);
   }
 
   async function generateIdeas() {
@@ -363,19 +407,73 @@ export default function ContentGenerator() {
                     </p>
                   )}
 
-                  {canVisual && (
+                  <div className="flex flex-wrap gap-2 mt-4">
                     <button
-                      onClick={() => toggleVisual(i)}
-                      className={`mt-4 py-2 px-5 rounded-full text-sm font-medium transition-all duration-400 ${
-                        isExpanded
+                      onClick={() => {
+                        const isNowOpen = !planOpen[i];
+                        setPlanOpen((prev) => ({ ...prev, [i]: isNowOpen }));
+                        if (isNowOpen && !planContent[i]) generatePlan(idea, i);
+                      }}
+                      className={`py-2 px-5 rounded-full text-sm font-medium transition-all duration-400 ${
+                        planOpen[i]
                           ? "bg-primary-fixed text-primary"
                           : "bg-surface-container text-on-surface hover:bg-surface-container-high"
                       }`}
                     >
-                      {isExpanded ? "✕ Fermer" : "🎨 Créer le visuel"}
+                      {planOpen[i] ? "✕ Fermer le plan" : "✦ Développer l'idée"}
                     </button>
-                  )}
+
+                    {canVisual && (
+                      <button
+                        onClick={() => toggleVisual(i)}
+                        className={`py-2 px-5 rounded-full text-sm font-medium transition-all duration-400 ${
+                          isExpanded
+                            ? "bg-primary-fixed text-primary"
+                            : "bg-surface-container text-on-surface hover:bg-surface-container-high"
+                        }`}
+                      >
+                        {isExpanded ? "✕ Fermer" : "🎨 Créer le visuel"}
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {/* Plan d'action — inline expand */}
+                {planOpen[i] && (
+                  <div className="border-t border-outline-variant/15 bg-surface-container-lowest px-5 py-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium text-outline uppercase tracking-widest">Plan d'action</p>
+                      {planContent[i] && loadingPlan !== i && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => copyPlan(i)}
+                            className="text-xs py-1 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-all duration-400"
+                          >
+                            {planCopied === i ? "✓ Copié" : "Copier tout"}
+                          </button>
+                          <button
+                            onClick={() => generatePlan(idea, i)}
+                            className="text-xs py-1 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-outline transition-all duration-400"
+                          >
+                            ↺ Regénérer
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {loadingPlan === i && !planContent[i] ? (
+                      <div className="flex items-center gap-2 py-3">
+                        <div className="w-4 h-4 rounded-full border-2 border-primary/20 border-t-primary animate-spin shrink-0" />
+                        <p className="text-xs text-outline">Génération du plan en cours…</p>
+                      </div>
+                    ) : (
+                      <pre className="whitespace-pre-wrap font-sans text-sm text-on-surface leading-relaxed">
+                        {planContent[i]}
+                        {loadingPlan === i && <span className="animate-pulse text-primary">▋</span>}
+                      </pre>
+                    )}
+                  </div>
+                )}
 
                 {/* Visual panel — inline expand */}
                 {isExpanded && canVisual && (

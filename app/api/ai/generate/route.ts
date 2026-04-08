@@ -28,6 +28,27 @@ Sujet : ${fields.sujet || "actualités bien-être"}.
 Points clés à développer : ${fields.points_cles || "actualités de la pratique"}.
 Structure : salutation chaleureuse ("Chère amie," ou "Bonjour [prénom],"), développement naturel des points clés, clôture avec invitation à prendre rendez-vous, signature "Avec amour, Esther 🌿".`;
 
+    case "plan":
+      return `Crée un plan d'action détaillé pour ce post : "${fields.titre}".
+Type de contenu : ${fields.type || "post Instagram"}. Idée de base : ${fields.caption || fields.scriptIdea || "à développer"}.
+
+Retourne exactement ces 5 sections avec ces titres en gras :
+
+**📝 Caption complète**
+La caption prête à publier (150-200 mots, ton naturel d'Esther, 1-2 emojis, accroche forte en premier).
+
+**#️⃣ Hashtags**
+10-12 hashtags pertinents sur une seule ligne.
+
+**🕐 Meilleur moment pour publier**
+Jour(s) et heure(s) recommandés pour ce type de contenu, avec une brève explication.
+
+**🎯 Points clés à couvrir**
+3-4 points essentiels à transmettre (utile pour les Réels ou stories avec du texte parlé).
+
+**💡 Idée de suite**
+Une idée de contenu complémentaire pour continuer sur ce thème.`;
+
     default:
       return `Écris du contenu de type ${type} sur : ${JSON.stringify(fields)}`;
   }
