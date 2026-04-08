@@ -3,659 +3,441 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-type Tab = "ideas" | "text" | "visual";
-type ContentType = "article" | "evenement" | "instagram" | "email";
+type Category = "instagram" | "reel" | "story" | "evenement" | "newsletter";
+type IdeaType = "photo" | "video" | "graphic";
 type VisualStyle = "botanique" | "naturel" | "minimaliste";
 type VisualFormat = "1:1" | "9:16" | "16:9" | "4:5";
 
+interface Idea {
+  type: IdeaType;
+  titre: string;
+  caption?: string;
+  scriptIdea?: string;
+  visualPrompt?: string | null;
+}
+
 interface HistoryItem {
-  id: string;
-  type: ContentType;
-  title: string;
+  titre: string;
   date: string;
-  preview: string;
 }
 
-interface FormField {
-  key: string;
-  label: string;
-  type: "text" | "select" | "textarea" | "toggle";
-  placeholder?: string;
-  options?: string[];
-}
-
-const CONTENT_TYPES: { value: ContentType; label: string; emoji: string }[] = [
-  { value: "article", label: "Article Journal", emoji: "📝" },
-  { value: "evenement", label: "Événement", emoji: "✨" },
+const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
   { value: "instagram", label: "Post Instagram", emoji: "📸" },
-  { value: "email", label: "Email Newsletter", emoji: "💌" },
+  { value: "reel", label: "Réel / Vidéo", emoji: "🎬" },
+  { value: "story", label: "Story", emoji: "✨" },
+  { value: "evenement", label: "Événement", emoji: "🌿" },
+  { value: "newsletter", label: "Newsletter", emoji: "💌" },
 ];
 
-const FORM_CONFIG: Record<ContentType, FormField[]> = {
-  article: [
-    { key: "sujet", label: "Sujet de l'article", type: "text", placeholder: "ex: cycle menstruel et alimentation" },
-    { key: "angle", label: "Angle / approche spécifique", type: "text", placeholder: "ex: lien entre stress et déséquilibre hormonal" },
-    { key: "mots_cles", label: "Mots-clés (séparés par des virgules)", type: "text", placeholder: "ex: naturopathie, hormones, bien-être féminin" },
-    { key: "longueur", label: "Longueur", type: "select", options: ["court (~300 mots)", "moyen (~600 mots)", "long (~1000 mots)"] },
-  ],
-  evenement: [
-    { key: "titre", label: "Titre de l'événement", type: "text", placeholder: "ex: Retraite Reiki au chalet" },
-    { key: "type_evt", label: "Type d'événement", type: "select", options: ["Soin de groupe", "Retraite", "Rencontre", "Collaboration"] },
-    { key: "themes", label: "Thèmes abordés", type: "text", placeholder: "ex: équilibre, lâcher-prise, connexion à la nature" },
-    { key: "public", label: "Public cible", type: "text", placeholder: "ex: femmes, tous publics, mères" },
-    { key: "duree", label: "Durée", type: "text", placeholder: "ex: 2h30" },
-    { key: "prix", label: "Prix", type: "text", placeholder: "ex: 85$" },
-  ],
-  instagram: [
-    { key: "sujet", label: "Sujet du post", type: "text", placeholder: "ex: bienfaits du Reiki sur le sommeil" },
-    { key: "humeur", label: "Ton du post", type: "select", options: ["Inspirant", "Éducatif", "Promotionnel", "Personnel"] },
-    { key: "hashtags", label: "Inclure des hashtags", type: "toggle" },
-  ],
-  email: [
-    { key: "sujet", label: "Sujet de l'email", type: "text", placeholder: "ex: Nouveau cycle de soins hormonaux" },
-    { key: "points_cles", label: "Points clés à aborder", type: "textarea", placeholder: "Listez les points principaux à développer dans l'email..." },
-    { key: "type_email", label: "Type d'email", type: "select", options: ["Informatif", "Promotionnel", "Saisonnier"] },
-  ],
+const FORMAT_OPTIONS: { value: VisualFormat; label: string; sub: string }[] = [
+  { value: "1:1", label: "Carré", sub: "Post" },
+  { value: "9:16", label: "Story", sub: "9:16" },
+  { value: "16:9", label: "Paysage", sub: "16:9" },
+  { value: "4:5", label: "Portrait", sub: "4:5" },
+];
+
+const STYLE_OPTIONS: { value: VisualStyle; label: string }[] = [
+  { value: "botanique", label: "Botanique" },
+  { value: "naturel", label: "Naturel" },
+  { value: "minimaliste", label: "Minimaliste" },
+];
+
+const STYLE_SUFFIX: Record<VisualStyle, string> = {
+  botanique: "botanical pressed flowers herbs organic paper textures warm earthy cream tones",
+  naturel: "natural soft golden daylight organic linen materials terracotta tones",
+  minimaliste: "minimalist clean composition generous white space elegant serif typography",
 };
 
-const TYPE_BADGES: Record<ContentType, string> = {
-  article: "bg-primary/10 text-primary",
-  evenement: "bg-secondary/10 text-secondary",
-  instagram: "bg-tertiary-fixed-dim/40 text-[#3e2a00]",
-  email: "bg-surface-container-high text-outline",
+const TYPE_CONFIG: Record<IdeaType, { emoji: string; label: string; color: string }> = {
+  photo: { emoji: "📸", label: "Photo", color: "bg-primary/10 text-primary" },
+  video: { emoji: "🎬", label: "Vidéo", color: "bg-secondary/10 text-secondary" },
+  graphic: { emoji: "🎨", label: "Graphique", color: "bg-tertiary-fixed-dim/40 text-[#3e2a00]" },
 };
-
-const FORMAT_OPTIONS: { value: VisualFormat; label: string; desc: string }[] = [
-  { value: "1:1", label: "Carré", desc: "Instagram post" },
-  { value: "9:16", label: "Story", desc: "Instagram / Facebook story" },
-  { value: "16:9", label: "Paysage", desc: "Facebook / LinkedIn" },
-  { value: "4:5", label: "Portrait", desc: "Pinterest / feed" },
-];
-
-const STYLE_OPTIONS: { value: VisualStyle; label: string; desc: string }[] = [
-  { value: "botanique", label: "Botanique", desc: "Illustrations, fleurs séchées" },
-  { value: "naturel", label: "Naturel", desc: "Photo lumière dorée" },
-  { value: "minimaliste", label: "Minimaliste", desc: "Épuré, beaucoup d'espace" },
-];
 
 const HISTORY_KEY = "esther_content_history";
 
 export default function ContentGenerator() {
-  const [activeTab, setActiveTab] = useState<Tab>("ideas");
+  const [category, setCategory] = useState<Category>("instagram");
+  const [userIdea, setUserIdea] = useState("");
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Ideas
-  const [ideasType, setIdeasType] = useState<ContentType>("instagram");
-  const [ideas, setIdeas] = useState<string[]>([]);
-  const [loadingIdeas, setLoadingIdeas] = useState(false);
-  const [ideasError, setIdeasError] = useState("");
-
-  // Text
-  const [textType, setTextType] = useState<ContentType>("instagram");
-  const [fields, setFields] = useState<Record<string, string>>({});
-  const [generatedText, setGeneratedText] = useState("");
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  // Visual
-  const [visualText, setVisualText] = useState("");
-  const [visualStyle, setVisualStyle] = useState<VisualStyle>("botanique");
+  // Visual state per idea index
+  const [expandedVisual, setExpandedVisual] = useState<number | null>(null);
   const [visualFormat, setVisualFormat] = useState<VisualFormat>("1:1");
-  const [imageUrl, setImageUrl] = useState("");
+  const [visualStyle, setVisualStyle] = useState<VisualStyle>("botanique");
   const [loadingVisual, setLoadingVisual] = useState(false);
-  const [predictionId, setPredictionId] = useState("");
+  const [predictionId, setPredictionId] = useState<string | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<Record<number, string>>({});
   const [visualError, setVisualError] = useState("");
 
-  // History
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(HISTORY_KEY);
-    if (saved) {
-      try { setHistory(JSON.parse(saved)); } catch { /* ignore */ }
-    }
+    try {
+      const saved = localStorage.getItem(HISTORY_KEY);
+      if (saved) setHistory(JSON.parse(saved));
+    } catch { /* ignore */ }
   }, []);
 
-  // Poll for visual result
+  // Poll visual result
   useEffect(() => {
-    if (!predictionId) return;
+    if (!predictionId || expandedVisual === null) return;
+    const ideaIndex = expandedVisual;
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/ai/visual/status?id=${predictionId}`);
         const data = await res.json();
         if (data.status === "completed" || data.status === "succeeded") {
-          setImageUrl(data.imageUrl);
+          setGeneratedImages((prev) => ({ ...prev, [ideaIndex]: data.imageUrl }));
           setLoadingVisual(false);
-          setPredictionId("");
+          setPredictionId(null);
           clearInterval(interval);
         } else if (data.status === "failed") {
-          setVisualError("La génération a échoué. Réessaie.");
+          setVisualError("Génération échouée. Réessaie.");
           setLoadingVisual(false);
-          setPredictionId("");
+          setPredictionId(null);
           clearInterval(interval);
         }
       } catch {
-        setVisualError("Erreur réseau. Réessaie.");
+        setVisualError("Erreur réseau.");
         setLoadingVisual(false);
-        setPredictionId("");
+        setPredictionId(null);
         clearInterval(interval);
       }
     }, 2500);
     return () => clearInterval(interval);
-  }, [predictionId]);
+  }, [predictionId, expandedVisual]);
 
-  function saveToHistory(type: ContentType, title: string, preview: string) {
+  function saveToHistory(titre: string) {
     const item: HistoryItem = {
-      id: Date.now().toString(),
-      type,
-      title,
+      titre,
       date: new Date().toLocaleDateString("fr-CA"),
-      preview: preview.slice(0, 90),
     };
-    const newHistory = [item, ...history].slice(0, 20);
-    setHistory(newHistory);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+    const updated = [item, ...history].slice(0, 15);
+    setHistory(updated);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
   }
 
   async function generateIdeas() {
-    setLoadingIdeas(true);
+    setLoading(true);
     setIdeas([]);
-    setIdeasError("");
+    setError("");
+    setExpandedVisual(null);
+    setGeneratedImages({});
     try {
       const res = await fetch("/api/ai/ideas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: ideasType,
-          history: history.map((h) => h.title).slice(0, 10),
+          category,
+          userIdea,
+          history: history.map((h) => h.titre).slice(0, 6),
         }),
       });
       const data = await res.json();
-      setIdeas(data.ideas || []);
+      if (!data.ideas?.length) throw new Error("Aucune idée retournée");
+      setIdeas(data.ideas);
+      data.ideas.forEach((idea: Idea) => saveToHistory(idea.titre));
     } catch {
-      setIdeasError("Erreur lors de la génération des idées.");
+      setError("Erreur lors de la génération. Réessaie.");
     }
-    setLoadingIdeas(false);
+    setLoading(false);
   }
 
-  function selectIdea(idea: string) {
-    setTextType(ideasType);
-    setFields({ sujet: idea });
-    setGeneratedText("");
-    setActiveTab("text");
-  }
-
-  async function generateText() {
-    setGeneratedText("");
-    setIsStreaming(true);
-    setCopied(false);
-    try {
-      const res = await fetch("/api/ai/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: textType, fields }),
-      });
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullText = "";
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        fullText += chunk;
-        setGeneratedText((prev) => prev + chunk);
-      }
-      const title = fields.sujet || fields.titre || "Contenu généré";
-      saveToHistory(textType, title, fullText);
-    } catch {
-      setGeneratedText("Erreur lors de la génération. Réessaie.");
-    }
-    setIsStreaming(false);
-  }
-
-  async function copyText() {
-    await navigator.clipboard.writeText(generatedText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  function sendToVisual() {
-    const preview = generatedText.slice(0, 120);
-    setVisualText(preview);
-    setActiveTab("visual");
-  }
-
-  async function generateVisual() {
-    setImageUrl("");
+  async function generateVisual(idea: Idea, index: number) {
     setVisualError("");
     setLoadingVisual(true);
+    setGeneratedImages((prev) => { const n = { ...prev }; delete n[index]; return n; });
+
+    const styleDesc = STYLE_SUFFIX[visualStyle];
+    const prompt = `${idea.visualPrompt || idea.titre}. ${styleDesc}. Warm earthy cream palette deep forest green accents soft gold touches. High-end French Canadian wellness brand. Professional serene inviting. No text overlay.`;
+
     try {
       const res = await fetch("/api/ai/visual", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          textContext: visualText,
+          textContext: prompt,
           style: visualStyle,
           format: visualFormat,
-          contentType: textType,
+          contentType: category,
         }),
       });
       const data = await res.json();
       if (!data.predictionId) throw new Error("No prediction ID");
       setPredictionId(data.predictionId);
     } catch {
-      setVisualError("Erreur lors du lancement de la génération.");
+      setVisualError("Erreur lors du lancement.");
       setLoadingVisual(false);
     }
   }
 
-  async function downloadImage() {
+  async function downloadImage(url: string, index: number) {
     try {
-      const response = await fetch(imageUrl);
+      const response = await fetch(url);
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `esther-visuel-${Date.now()}.jpg`;
+      a.href = objUrl;
+      a.download = `esther-post-${index + 1}-${Date.now()}.jpg`;
       a.click();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(objUrl);
     } catch {
-      window.open(imageUrl, "_blank");
+      window.open(url, "_blank");
     }
   }
 
-  function clearHistory() {
-    setHistory([]);
-    localStorage.removeItem(HISTORY_KEY);
-  }
-
-  function updateField(key: string, value: string) {
-    setFields((prev) => ({ ...prev, [key]: value }));
+  function toggleVisual(index: number) {
+    if (expandedVisual === index) {
+      setExpandedVisual(null);
+    } else {
+      setExpandedVisual(index);
+      setVisualError("");
+    }
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8">
+    <div className="p-8 max-w-3xl mx-auto space-y-8">
       {/* Header */}
       <div>
         <p className="label-md uppercase tracking-widest text-outline mb-1">Admin</p>
-        <h1 className="font-serif text-3xl text-primary">Outil contenu IA</h1>
-        <p className="text-outline mt-1">Génère du contenu pour ton site et tes réseaux sociaux.</p>
+        <h1 className="font-serif text-3xl text-primary">Créer du contenu</h1>
+        <p className="text-outline mt-1 text-sm">Pour tes réseaux sociaux et communications.</p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 bg-surface-container-low rounded-2xl p-1.5">
-        {(
-          [
-            { key: "ideas", label: "💡 Idées" },
-            { key: "text", label: "✍️ Texte" },
-            { key: "visual", label: "🎨 Visuel" },
-          ] as const
-        ).map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-400 ${
-              activeTab === tab.key
-                ? "bg-surface-container-lowest shadow-sm text-primary"
-                : "text-outline hover:text-on-surface"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ─── TAB: IDEAS ──────────────────────────────────────── */}
-      {activeTab === "ideas" && (
-        <div className="space-y-6">
-          <div className="bg-surface-container-low rounded-2xl p-6 space-y-4">
-            <p className="text-sm text-outline">Type de contenu</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {CONTENT_TYPES.map((ct) => (
-                <button
-                  key={ct.value}
-                  onClick={() => setIdeasType(ct.value)}
-                  className={`py-3 px-4 rounded-xl text-sm font-medium transition-all duration-400 text-left ${
-                    ideasType === ct.value
-                      ? "bg-primary text-surface"
-                      : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-high"
-                  }`}
-                >
-                  <span className="block text-lg mb-1">{ct.emoji}</span>
-                  {ct.label}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={generateIdeas}
-              disabled={loadingIdeas}
-              className="w-full py-3 px-6 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] font-medium text-sm hover:scale-[1.02] transition-all duration-400 disabled:opacity-60 disabled:scale-100"
-            >
-              {loadingIdeas ? "Génération en cours…" : "✨ Suggère 6 idées"}
-            </button>
-          </div>
-
-          {ideasError && (
-            <p className="text-sm text-error text-center">{ideasError}</p>
-          )}
-
-          {ideas.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {ideas.map((idea, i) => (
-                <button
-                  key={i}
-                  onClick={() => selectIdea(idea)}
-                  className="bg-surface-container-low hover:bg-surface-container rounded-2xl p-5 text-left transition-all duration-400 group"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-tertiary-fixed-dim font-serif text-2xl leading-none mt-0.5">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1">
-                      <p className="text-on-surface text-sm font-medium leading-snug">{idea}</p>
-                      <p className="text-outline text-xs mt-2 group-hover:text-primary transition-colors duration-400">
-                        Utiliser cette idée →
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {ideas.length === 0 && !loadingIdeas && (
-            <div className="text-center py-12 text-outline">
-              <p className="text-4xl mb-3">💡</p>
-              <p className="text-sm">Sélectionne un type et clique sur "Suggère 6 idées"</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ─── TAB: TEXTE ──────────────────────────────────────── */}
-      {activeTab === "text" && (
-        <div className="space-y-6">
-          {/* Type selector */}
-          <div className="bg-surface-container-low rounded-2xl p-6 space-y-4">
-            <p className="text-sm text-outline">Type de contenu</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {CONTENT_TYPES.map((ct) => (
-                <button
-                  key={ct.value}
-                  onClick={() => { setTextType(ct.value); setFields({}); setGeneratedText(""); }}
-                  className={`py-3 px-4 rounded-xl text-sm font-medium transition-all duration-400 text-left ${
-                    textType === ct.value
-                      ? "bg-primary text-surface"
-                      : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-high"
-                  }`}
-                >
-                  <span className="block text-lg mb-1">{ct.emoji}</span>
-                  {ct.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Dynamic form */}
-          <div className="bg-surface-container-low rounded-2xl p-6 space-y-4">
-            {FORM_CONFIG[textType].map((field) => (
-              <div key={field.key}>
-                <label className="block text-sm text-outline mb-1.5">{field.label}</label>
-                {field.type === "text" && (
-                  <input
-                    type="text"
-                    value={fields[field.key] || ""}
-                    onChange={(e) => updateField(field.key, e.target.value)}
-                    placeholder={field.placeholder}
-                    className="w-full bg-surface-container-lowest rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-outline/60 outline-none focus:ring-1 focus:ring-primary/30"
-                  />
-                )}
-                {field.type === "select" && (
-                  <select
-                    value={fields[field.key] || ""}
-                    onChange={(e) => updateField(field.key, e.target.value)}
-                    className="w-full bg-surface-container-lowest rounded-xl px-4 py-2.5 text-sm text-on-surface outline-none focus:ring-1 focus:ring-primary/30"
-                  >
-                    <option value="">Sélectionner…</option>
-                    {field.options?.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                )}
-                {field.type === "textarea" && (
-                  <textarea
-                    value={fields[field.key] || ""}
-                    onChange={(e) => updateField(field.key, e.target.value)}
-                    placeholder={field.placeholder}
-                    rows={3}
-                    className="w-full bg-surface-container-lowest rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-outline/60 outline-none focus:ring-1 focus:ring-primary/30 resize-none"
-                  />
-                )}
-                {field.type === "toggle" && (
-                  <button
-                    onClick={() => updateField(field.key, fields[field.key] === "true" ? "false" : "true")}
-                    className={`relative w-11 h-6 rounded-full transition-all duration-400 ${
-                      fields[field.key] === "true" ? "bg-primary" : "bg-surface-container-high"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-400 ${
-                        fields[field.key] === "true" ? "left-5.5" : "left-0.5"
-                      }`}
-                    />
-                  </button>
-                )}
-              </div>
+      {/* Step 1 — Setup */}
+      <div className="bg-surface-container-low rounded-2xl p-6 space-y-5">
+        {/* Category */}
+        <div>
+          <p className="text-sm text-outline mb-3">Type de contenu</p>
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.value}
+                onClick={() => setCategory(cat.value)}
+                className={`py-2 px-4 rounded-full text-sm font-medium transition-all duration-400 ${
+                  category === cat.value
+                    ? "bg-primary text-surface"
+                    : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-high"
+                }`}
+              >
+                {cat.emoji} {cat.label}
+              </button>
             ))}
-
-            <button
-              onClick={generateText}
-              disabled={isStreaming}
-              className="w-full py-3 px-6 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] font-medium text-sm hover:scale-[1.02] transition-all duration-400 disabled:opacity-60 disabled:scale-100 mt-2"
-            >
-              {isStreaming ? "Génération en cours…" : "✨ Générer le contenu"}
-            </button>
           </div>
+        </div>
 
-          {/* Generated output */}
-          {(generatedText || isStreaming) && (
-            <div className="bg-surface-container-low rounded-2xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-on-surface">Contenu généré</p>
-                <div className="flex gap-2">
-                  {generatedText && !isStreaming && (
-                    <>
-                      <button
-                        onClick={copyText}
-                        className="py-1.5 px-4 rounded-full text-xs font-medium bg-surface-container-high hover:bg-surface-container text-on-surface transition-all duration-400"
-                      >
-                        {copied ? "✓ Copié" : "Copier"}
-                      </button>
-                      <button
-                        onClick={sendToVisual}
-                        className="py-1.5 px-4 rounded-full text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-400"
-                      >
-                        → Créer le visuel
-                      </button>
-                      <button
-                        onClick={generateText}
-                        className="py-1.5 px-4 rounded-full text-xs font-medium bg-surface-container-high hover:bg-surface-container text-outline transition-all duration-400"
-                      >
-                        Regénérer
-                      </button>
-                    </>
+        {/* Optional idea */}
+        <div>
+          <label className="block text-sm text-outline mb-1.5">
+            Ton idée générale <span className="text-outline/50">(optionnel — laisse vide pour des suggestions)</span>
+          </label>
+          <input
+            type="text"
+            value={userIdea}
+            onChange={(e) => setUserIdea(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && generateIdeas()}
+            placeholder="ex: bienfaits du Reiki sur le sommeil, ma retraite de juin…"
+            className="w-full bg-surface-container-lowest rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-outline/50 outline-none focus:ring-1 focus:ring-primary/30"
+          />
+        </div>
+
+        <button
+          onClick={generateIdeas}
+          disabled={loading}
+          className="w-full py-3 px-6 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] font-semibold text-sm hover:scale-[1.02] transition-all duration-400 disabled:opacity-60 disabled:scale-100"
+        >
+          {loading ? "Génération des idées…" : "✨ Générer 3 idées"}
+        </button>
+
+        {error && <p className="text-sm text-error text-center">{error}</p>}
+      </div>
+
+      {/* Step 2 — Ideas */}
+      {ideas.length > 0 && (
+        <div className="space-y-4">
+          <p className="text-sm text-outline px-1">3 idées générées — clique sur une idée pour créer le visuel</p>
+          {ideas.map((idea, i) => {
+            const cfg = TYPE_CONFIG[idea.type] || TYPE_CONFIG.photo;
+            const isExpanded = expandedVisual === i;
+            const imgUrl = generatedImages[i];
+            const canVisual = idea.type !== "video" && idea.visualPrompt !== null;
+
+            return (
+              <div key={i} className="bg-surface-container-low rounded-2xl overflow-hidden">
+                {/* Idea card */}
+                <div className="p-5">
+                  <div className="flex items-start gap-3">
+                    <span className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${cfg.color}`}>
+                      {cfg.emoji} {cfg.label}
+                    </span>
+                  </div>
+                  <p className="font-serif text-on-surface text-lg mt-3 leading-snug">{idea.titre}</p>
+
+                  {idea.caption && (
+                    <p className="text-sm text-outline mt-2 leading-relaxed line-clamp-2 italic">
+                      "{idea.caption}"
+                    </p>
+                  )}
+                  {idea.scriptIdea && (
+                    <p className="text-sm text-outline mt-2 leading-relaxed">
+                      💡 {idea.scriptIdea}
+                    </p>
+                  )}
+
+                  {canVisual && (
+                    <button
+                      onClick={() => toggleVisual(i)}
+                      className={`mt-4 py-2 px-5 rounded-full text-sm font-medium transition-all duration-400 ${
+                        isExpanded
+                          ? "bg-primary text-surface"
+                          : "bg-surface-container text-on-surface hover:bg-surface-container-high"
+                      }`}
+                    >
+                      {isExpanded ? "✕ Fermer" : "🎨 Créer le visuel"}
+                    </button>
                   )}
                 </div>
+
+                {/* Visual panel — inline expand */}
+                {isExpanded && canVisual && (
+                  <div className="border-t border-outline-variant/15 bg-surface-container-lowest p-5 space-y-4">
+                    {/* Format + Style */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-outline mb-2">Format</p>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {FORMAT_OPTIONS.map((f) => (
+                            <button
+                              key={f.value}
+                              onClick={() => setVisualFormat(f.value)}
+                              className={`py-2 px-2 rounded-xl text-xs font-medium transition-all duration-400 ${
+                                visualFormat === f.value
+                                  ? "bg-primary text-surface"
+                                  : "bg-surface-container text-on-surface hover:bg-surface-container-high"
+                              }`}
+                            >
+                              {f.label}
+                              <span className={`block text-[10px] mt-0.5 ${visualFormat === f.value ? "text-surface/60" : "text-outline"}`}>{f.sub}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-outline mb-2">Style</p>
+                        <div className="grid grid-cols-1 gap-1.5">
+                          {STYLE_OPTIONS.map((s) => (
+                            <button
+                              key={s.value}
+                              onClick={() => setVisualStyle(s.value)}
+                              className={`py-2 px-3 rounded-xl text-xs font-medium transition-all duration-400 text-left ${
+                                visualStyle === s.value
+                                  ? "bg-primary text-surface"
+                                  : "bg-surface-container text-on-surface hover:bg-surface-container-high"
+                              }`}
+                            >
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    {!loadingVisual && !imgUrl && (
+                      <button
+                        onClick={() => generateVisual(idea, i)}
+                        className="w-full py-3 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] font-semibold text-sm hover:scale-[1.02] transition-all duration-400"
+                      >
+                        Générer le post →
+                      </button>
+                    )}
+
+                    {visualError && (
+                      <p className="text-sm text-error text-center">{visualError}</p>
+                    )}
+
+                    {/* Loading */}
+                    {loadingVisual && (
+                      <div className="flex flex-col items-center gap-2 py-6">
+                        <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                        <p className="text-xs text-outline">Nano Banana génère ton visuel… ~20 sec</p>
+                      </div>
+                    )}
+
+                    {/* Result */}
+                    {imgUrl && (
+                      <div className="space-y-3">
+                        <div className="rounded-xl overflow-hidden">
+                          <Image
+                            src={imgUrl}
+                            alt={idea.titre}
+                            width={800}
+                            height={800}
+                            className="w-full h-auto"
+                            unoptimized
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => downloadImage(imgUrl, i)}
+                            className="flex-1 py-2 rounded-full bg-primary text-surface text-sm font-medium hover:bg-primary/90 transition-all duration-400"
+                          >
+                            ↓ Télécharger
+                          </button>
+                          <button
+                            onClick={() => generateVisual(idea, i)}
+                            className="py-2 px-4 rounded-full bg-surface-container text-outline text-sm hover:bg-surface-container-high transition-all duration-400"
+                          >
+                            Regénérer
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-              <pre className="whitespace-pre-wrap font-sans text-sm text-on-surface leading-relaxed min-h-[120px]">
-                {generatedText}
-                {isStreaming && <span className="animate-pulse text-primary">▋</span>}
-              </pre>
-            </div>
-          )}
+            );
+          })}
+
+          {/* Regénérer 3 nouvelles idées */}
+          <button
+            onClick={generateIdeas}
+            disabled={loading}
+            className="w-full py-2.5 rounded-full border border-outline-variant/30 text-outline text-sm hover:bg-surface-container-low transition-all duration-400 disabled:opacity-50"
+          >
+            ↺ Générer 3 autres idées
+          </button>
         </div>
       )}
 
-      {/* ─── TAB: VISUEL ─────────────────────────────────────── */}
-      {activeTab === "visual" && (
-        <div className="space-y-6">
-          <div className="bg-surface-container-low rounded-2xl p-6 space-y-5">
-            {/* Context text */}
-            <div>
-              <label className="block text-sm text-outline mb-1.5">Contexte / thème du visuel</label>
-              <textarea
-                value={visualText}
-                onChange={(e) => setVisualText(e.target.value)}
-                placeholder="Décris le contenu ou colle l'extrait de texte généré…"
-                rows={3}
-                className="w-full bg-surface-container-lowest rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-outline/60 outline-none focus:ring-1 focus:ring-primary/30 resize-none"
-              />
-            </div>
-
-            {/* Style */}
-            <div>
-              <p className="text-sm text-outline mb-2">Style visuel</p>
-              <div className="grid grid-cols-3 gap-3">
-                {STYLE_OPTIONS.map((s) => (
-                  <button
-                    key={s.value}
-                    onClick={() => setVisualStyle(s.value)}
-                    className={`py-3 px-3 rounded-xl text-left transition-all duration-400 ${
-                      visualStyle === s.value
-                        ? "bg-primary text-surface"
-                        : "bg-surface-container-lowest hover:bg-surface-container-high text-on-surface"
-                    }`}
-                  >
-                    <p className="text-sm font-medium">{s.label}</p>
-                    <p className={`text-xs mt-0.5 ${visualStyle === s.value ? "text-surface/70" : "text-outline"}`}>{s.desc}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Format */}
-            <div>
-              <p className="text-sm text-outline mb-2">Format</p>
-              <div className="grid grid-cols-4 gap-3">
-                {FORMAT_OPTIONS.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => setVisualFormat(f.value)}
-                    className={`py-3 px-3 rounded-xl text-left transition-all duration-400 ${
-                      visualFormat === f.value
-                        ? "bg-primary text-surface"
-                        : "bg-surface-container-lowest hover:bg-surface-container-high text-on-surface"
-                    }`}
-                  >
-                    <p className="text-sm font-medium">{f.label}</p>
-                    <p className={`text-xs mt-0.5 ${visualFormat === f.value ? "text-surface/70" : "text-outline"}`}>{f.desc}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {visualError && (
-              <p className="text-sm text-error text-center">{visualError}</p>
-            )}
-          </div>
-
-          {/* CTA séparé — bien visible */}
-          {!loadingVisual && !imageUrl && (
-            <div className="bg-primary rounded-2xl p-6 flex flex-col items-center gap-3 text-center">
-              <p className="font-serif text-surface text-lg">Prête à créer ton visuel ?</p>
-              <p className="text-surface/60 text-sm">
-                {visualFormat === "9:16" ? "Story Instagram / Facebook" :
-                 visualFormat === "16:9" ? "Post paysage (Facebook / LinkedIn)" :
-                 visualFormat === "4:5" ? "Post portrait (Pinterest)" :
-                 "Post carré Instagram"} · Style {STYLE_OPTIONS.find(s => s.value === visualStyle)?.label}
-              </p>
-              <button
-                onClick={generateVisual}
-                className="mt-1 py-3 px-8 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] font-semibold text-sm hover:scale-[1.02] transition-all duration-400"
-              >
-                Générer le post →
-              </button>
-            </div>
-          )}
-
-          {/* Loading state */}
-          {loadingVisual && (
-            <div className="bg-surface-container-low rounded-2xl p-12 text-center space-y-3">
-              <div className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin mx-auto" />
-              <p className="text-sm text-outline">Nano Banana Pro génère ton visuel…</p>
-              <p className="text-xs text-outline/60">Ça prend environ 15–30 secondes</p>
-            </div>
-          )}
-
-          {/* Result */}
-          {imageUrl && !loadingVisual && (
-            <div className="bg-surface-container-low rounded-2xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-on-surface">Visuel généré</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={downloadImage}
-                    className="py-1.5 px-4 rounded-full text-xs font-medium bg-primary text-surface hover:bg-primary/90 transition-all duration-400"
-                  >
-                    ↓ Télécharger
-                  </button>
-                  <button
-                    onClick={generateVisual}
-                    className="py-1.5 px-4 rounded-full text-xs font-medium bg-surface-container-high hover:bg-surface-container text-outline transition-all duration-400"
-                  >
-                    Regénérer
-                  </button>
-                </div>
-              </div>
-              <div className="relative w-full rounded-2xl overflow-hidden bg-surface-container">
-                <Image
-                  src={imageUrl}
-                  alt="Visuel généré"
-                  width={800}
-                  height={800}
-                  className="w-full h-auto"
-                  unoptimized
-                />
-              </div>
-            </div>
-          )}
-
-          {!imageUrl && !loadingVisual && (
-            <div className="text-center py-12 text-outline">
-              <p className="text-4xl mb-3">🎨</p>
-              <p className="text-sm">Configure le style et le format, puis génère ton visuel</p>
-            </div>
-          )}
+      {/* Empty state */}
+      {ideas.length === 0 && !loading && (
+        <div className="text-center py-16 text-outline space-y-2">
+          <p className="text-5xl">✨</p>
+          <p className="text-sm">Sélectionne un type de contenu et génère des idées</p>
         </div>
       )}
 
-      {/* ─── HISTORIQUE ──────────────────────────────────────── */}
+      {/* History */}
       {history.length > 0 && (
-        <div className="space-y-3 pt-4 border-t border-outline-variant/20">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-on-surface">Historique ({history.length})</p>
+        <div className="space-y-2 pt-4 border-t border-outline-variant/15">
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-outline">Récemment généré</p>
             <button
-              onClick={clearHistory}
-              className="text-xs text-outline hover:text-error transition-colors duration-400"
+              onClick={() => { setHistory([]); localStorage.removeItem(HISTORY_KEY); }}
+              className="text-xs text-outline/50 hover:text-error transition-colors duration-400"
             >
-              Effacer tout
+              Effacer
             </button>
           </div>
-          <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-            {history.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-start gap-3 bg-surface-container-low rounded-xl p-3"
-              >
-                <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${TYPE_BADGES[item.type]}`}>
-                  {CONTENT_TYPES.find((ct) => ct.value === item.type)?.label}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-on-surface truncate">{item.title}</p>
-                  <p className="text-xs text-outline mt-0.5 line-clamp-1">{item.preview}</p>
-                </div>
-                <span className="shrink-0 text-xs text-outline">{item.date}</span>
-              </div>
+          <div className="flex flex-wrap gap-2">
+            {history.slice(0, 8).map((h, i) => (
+              <span key={i} className="text-xs bg-surface-container-low text-outline px-3 py-1 rounded-full">
+                {h.titre}
+              </span>
             ))}
           </div>
         </div>

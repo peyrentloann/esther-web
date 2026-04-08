@@ -2,11 +2,12 @@ import { cookies } from "next/headers";
 
 const OR_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-const TYPE_LABELS: Record<string, string> = {
-  article: "article de blog sur la naturopathie / santé hormonale / bien-être",
-  evenement: "description d'événement (retraite, soin de groupe, rencontre bien-être)",
-  instagram: "post Instagram pour praticienne en bien-être",
-  email: "email newsletter pour clientes en naturopathie",
+const CATEGORY_LABELS: Record<string, string> = {
+  instagram: "post Instagram (photo ou graphique)",
+  reel: "Réel ou vidéo courte (TikTok / Instagram Reel)",
+  story: "Story Instagram ou Facebook",
+  evenement: "promotion d'un événement ou retraite bien-être",
+  newsletter: "email newsletter pour clientes",
 };
 
 export async function POST(request: Request) {
@@ -16,11 +17,14 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { type, history } = await request.json();
-  const label = TYPE_LABELS[type] || type;
+  const { category, userIdea, history } = await request.json();
+  const label = CATEGORY_LABELS[category] || category;
+  const ideaContext = userIdea?.trim()
+    ? `Thème suggéré par Esther : "${userIdea}". Développe ce thème de 3 façons différentes.`
+    : "Propose 3 idées variées et originales.";
   const historyNote =
-    history && history.length > 0
-      ? `\n\nSujets déjà traités récemment (à éviter) : ${history.slice(0, 8).join(", ")}.`
+    history?.length > 0
+      ? ` Sujets déjà traités (à éviter) : ${history.slice(0, 6).join(", ")}.`
       : "";
 
   const response = await fetch(OR_URL, {
@@ -31,13 +35,28 @@ export async function POST(request: Request) {
     },
     body: JSON.stringify({
       model: "anthropic/claude-haiku-4-5",
-      max_tokens: 600,
+      max_tokens: 900,
       messages: [
         {
           role: "user",
-          content: `Tu es l'assistante d'Esther Laframboise, naturothérapeute et Maître Reiki à Shefford, QC. Propose 6 idées originales de ${label} pour sa clientèle (femmes, approche holistique, santé féminine, Reiki, naturopathie).${historyNote}
+          content: `Tu es l'assistante d'Esther Laframboise, naturothérapeute et Maître Reiki à Shefford, QC. Elle veut créer du contenu pour : ${label}.${historyNote}
 
-Retourne UNIQUEMENT un tableau JSON de 6 chaînes de caractères (titres / idées courtes, max 10 mots chacune), sans markdown, sans explication. Exemple : ["Idée 1", "Idée 2", "Idée 3", "Idée 4", "Idée 5", "Idée 6"]`,
+${ideaContext}
+
+Pour chaque idée, détermine si c'est du contenu "photo", "video" ou "graphic" (infographie/carrousel).
+
+Retourne UNIQUEMENT un tableau JSON de 3 objets, sans markdown. Format exact :
+[
+  {
+    "type": "photo",
+    "titre": "Titre court et accrocheur (max 8 mots)",
+    "caption": "Début de la caption Instagram (2-3 phrases, ton d'Esther, en français)",
+    "visualPrompt": "Description en anglais pour génération d'image IA (décor, ambiance, éléments visuels, max 30 mots)"
+  }
+]
+
+Pour type "video" : remplace "caption" par "scriptIdea" (idée de script en 1-2 phrases) et "visualPrompt" par null.
+Pour type "graphic" : "visualPrompt" décrit l'infographie ou le design.`,
         },
       ],
     }),
@@ -46,7 +65,7 @@ Retourne UNIQUEMENT un tableau JSON de 6 chaînes de caractères (titres / idée
   const data = await response.json();
   const raw = data.choices?.[0]?.message?.content?.trim() ?? "[]";
 
-  let ideas: string[] = [];
+  let ideas = [];
   try {
     const match = raw.match(/\[[\s\S]*\]/);
     ideas = match ? JSON.parse(match[0]) : [];
