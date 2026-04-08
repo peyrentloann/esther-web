@@ -295,7 +295,7 @@ export default function ContentGenerator() {
                 onClick={() => setCategory(cat.value)}
                 className={`py-2 px-4 rounded-full text-sm font-medium transition-all duration-400 ${
                   category === cat.value
-                    ? "bg-primary text-surface"
+                    ? "bg-primary-fixed text-primary"
                     : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-high"
                 }`}
               >
@@ -368,7 +368,7 @@ export default function ContentGenerator() {
                       onClick={() => toggleVisual(i)}
                       className={`mt-4 py-2 px-5 rounded-full text-sm font-medium transition-all duration-400 ${
                         isExpanded
-                          ? "bg-primary text-surface"
+                          ? "bg-primary-fixed text-primary"
                           : "bg-surface-container text-on-surface hover:bg-surface-container-high"
                       }`}
                     >
