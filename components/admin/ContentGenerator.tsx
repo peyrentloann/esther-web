@@ -554,18 +554,29 @@ export default function ContentGenerator() {
               </div>
             </div>
 
-            <button
-              onClick={generateVisual}
-              disabled={loadingVisual}
-              className="w-full py-3 px-6 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] font-medium text-sm hover:scale-[1.02] transition-all duration-400 disabled:opacity-60 disabled:scale-100"
-            >
-              {loadingVisual ? "Génération en cours… (15–30 sec)" : "🎨 Générer le visuel"}
-            </button>
-
             {visualError && (
               <p className="text-sm text-error text-center">{visualError}</p>
             )}
           </div>
+
+          {/* CTA séparé — bien visible */}
+          {!loadingVisual && !imageUrl && (
+            <div className="bg-primary rounded-2xl p-6 flex flex-col items-center gap-3 text-center">
+              <p className="font-serif text-surface text-lg">Prête à créer ton visuel ?</p>
+              <p className="text-surface/60 text-sm">
+                {visualFormat === "9:16" ? "Story Instagram / Facebook" :
+                 visualFormat === "16:9" ? "Post paysage (Facebook / LinkedIn)" :
+                 visualFormat === "4:5" ? "Post portrait (Pinterest)" :
+                 "Post carré Instagram"} · Style {STYLE_OPTIONS.find(s => s.value === visualStyle)?.label}
+              </p>
+              <button
+                onClick={generateVisual}
+                className="mt-1 py-3 px-8 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] font-semibold text-sm hover:scale-[1.02] transition-all duration-400"
+              >
+                Générer le post →
+              </button>
+            </div>
+          )}
 
           {/* Loading state */}
           {loadingVisual && (
