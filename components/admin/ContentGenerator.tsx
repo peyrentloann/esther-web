@@ -30,6 +30,16 @@ interface GalleryItem {
   date: string;
 }
 
+interface SavedIdea {
+  id: string;
+  titre: string;
+  type: IdeaType;
+  category: Category;
+  caption?: string;
+  scriptIdea?: string;
+  date: string;
+}
+
 const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
   { value: "instagram", label: "Post Instagram", emoji: "📸" },
   { value: "reel", label: "Réel / Vidéo", emoji: "🎬" },
@@ -65,6 +75,7 @@ const TYPE_CONFIG: Record<IdeaType, { emoji: string; label: string; color: strin
 
 const HISTORY_KEY = "esther_content_history";
 const GALLERY_KEY = "esther_visual_gallery";
+const SAVED_IDEAS_KEY = "esther_saved_ideas";
 
 export default function ContentGenerator() {
   const [category, setCategory] = useState<Category>("instagram");
@@ -87,6 +98,8 @@ export default function ContentGenerator() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [savedIdeas, setSavedIdeas] = useState<SavedIdea[]>([]);
+  const [savedOpen, setSavedOpen] = useState(false);
 
   // Plan d'action per idea
   const [planContent, setPlanContent] = useState<Record<number, string>>({});
@@ -100,6 +113,8 @@ export default function ContentGenerator() {
       if (saved) setHistory(JSON.parse(saved));
       const savedGallery = localStorage.getItem(GALLERY_KEY);
       if (savedGallery) setGallery(JSON.parse(savedGallery));
+      const si = localStorage.getItem(SAVED_IDEAS_KEY);
+      if (si) setSavedIdeas(JSON.parse(si));
     } catch { /* ignore */ }
   }, []);
 
@@ -198,6 +213,53 @@ export default function ContentGenerator() {
       localStorage.setItem(GALLERY_KEY, JSON.stringify(updated));
       return updated;
     });
+  }
+
+  function toggleSaveIdea(idea: Idea, index: number) {
+    const existingIndex = savedIdeas.findIndex(
+      (s) => s.titre === idea.titre
+    );
+    if (existingIndex >= 0) {
+      const updated = savedIdeas.filter((_, i) => i !== existingIndex);
+      setSavedIdeas(updated);
+      localStorage.setItem(SAVED_IDEAS_KEY, JSON.stringify(updated));
+    } else {
+      const item: SavedIdea = {
+        id: `${Date.now()}-${index}`,
+        titre: idea.titre,
+        type: idea.type,
+        category,
+        caption: idea.caption,
+        scriptIdea: idea.scriptIdea,
+        date: new Date().toLocaleDateString("fr-CA"),
+      };
+      const updated = [item, ...savedIdeas];
+      setSavedIdeas(updated);
+      localStorage.setItem(SAVED_IDEAS_KEY, JSON.stringify(updated));
+    }
+  }
+
+  function deleteSavedIdea(id: string) {
+    const updated = savedIdeas.filter((s) => s.id !== id);
+    setSavedIdeas(updated);
+    localStorage.setItem(SAVED_IDEAS_KEY, JSON.stringify(updated));
+  }
+
+  function isIdeaSaved(titre: string) {
+    return savedIdeas.some((s) => s.titre === titre);
+  }
+
+  function extractCaption(planText: string): string {
+    const match = planText.match(/\*\*📝 Caption complète\*\*\s*\n([\s\S]*?)(?=\n\*\*|$)/);
+    return match ? match[1].trim() : "";
+  }
+
+  async function copyCaption(index: number) {
+    const caption = extractCaption(planContent[index] || "");
+    if (!caption) return;
+    await navigator.clipboard.writeText(caption);
+    setPlanCopied(index * 100); // use *100 offset to distinguish from "copy all"
+    setTimeout(() => setPlanCopied(null), 2000);
   }
 
   async function generatePlan(idea: Idea, index: number) {
@@ -423,6 +485,18 @@ export default function ContentGenerator() {
                       {planOpen[i] ? "✕ Fermer le plan" : "✦ Développer l'idée"}
                     </button>
 
+                    <button
+                      onClick={() => toggleSaveIdea(idea, i)}
+                      title={isIdeaSaved(idea.titre) ? "Retirer des sauvegardées" : "Sauvegarder cette idée"}
+                      className={`py-2 px-4 rounded-full text-sm font-medium transition-all duration-400 ${
+                        isIdeaSaved(idea.titre)
+                          ? "bg-tertiary-fixed-dim text-[#3e2a00]"
+                          : "bg-surface-container text-outline hover:bg-surface-container-high"
+                      }`}
+                    >
+                      {isIdeaSaved(idea.titre) ? "★ Sauvegardée" : "☆ Sauvegarder"}
+                    </button>
+
                     {canVisual && (
                       <button
                         onClick={() => toggleVisual(i)}
@@ -445,6 +519,14 @@ export default function ContentGenerator() {
                       <p className="text-xs font-medium text-outline uppercase tracking-widest">Plan d'action</p>
                       {planContent[i] && loadingPlan !== i && (
                         <div className="flex gap-2">
+                          {extractCaption(planContent[i] || "") && (
+                            <button
+                              onClick={() => copyCaption(i)}
+                              className="text-xs py-1 px-3 rounded-full bg-primary-fixed text-primary hover:bg-primary-fixed/80 transition-all duration-400 font-medium"
+                            >
+                              {planCopied === i * 100 ? "✓ Caption copiée" : "📋 Copier la caption"}
+                            </button>
+                          )}
                           <button
                             onClick={() => copyPlan(i)}
                             className="text-xs py-1 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-all duration-400"
@@ -601,6 +683,53 @@ export default function ContentGenerator() {
         <div className="text-center py-16 text-outline space-y-2">
           <p className="text-5xl">✨</p>
           <p className="text-sm">Sélectionne un type de contenu et génère des idées</p>
+        </div>
+      )}
+
+      {/* Saved Ideas */}
+      {savedIdeas.length > 0 && (
+        <div className="space-y-3 pt-4 border-t border-outline-variant/15">
+          <button
+            onClick={() => setSavedOpen((o) => !o)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-on-surface">★ Idées sauvegardées</p>
+              <span className="text-xs bg-tertiary-fixed-dim/60 text-[#3e2a00] px-2 py-0.5 rounded-full">{savedIdeas.length}</span>
+            </div>
+            <span className="text-outline text-xs">{savedOpen ? "▲ Réduire" : "▼ Voir tout"}</span>
+          </button>
+
+          {savedOpen && (
+            <div className="space-y-2">
+              {savedIdeas.map((idea) => {
+                const cfg = TYPE_CONFIG[idea.type] || TYPE_CONFIG.photo;
+                return (
+                  <div key={idea.id} className="flex items-start gap-3 bg-surface-container-low rounded-xl p-4">
+                    <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${cfg.color}`}>
+                      {cfg.emoji}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-on-surface">{idea.titre}</p>
+                      {idea.caption && (
+                        <p className="text-xs text-outline mt-0.5 line-clamp-1 italic">"{idea.caption}"</p>
+                      )}
+                      {idea.scriptIdea && (
+                        <p className="text-xs text-outline mt-0.5 line-clamp-1">💡 {idea.scriptIdea}</p>
+                      )}
+                      <p className="text-[10px] text-outline/50 mt-1">{idea.date}</p>
+                    </div>
+                    <button
+                      onClick={() => deleteSavedIdea(idea.id)}
+                      className="shrink-0 text-xs text-outline/40 hover:text-error transition-colors duration-300 p-1"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
