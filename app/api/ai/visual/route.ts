@@ -2,20 +2,28 @@ import { cookies } from "next/headers";
 
 const ATLAS_URL = "https://api.atlascloud.ai/api/v1/model/generateImage";
 
-const STYLE_DESC: Record<string, string> = {
-  botanique:
-    "botanical aesthetic with pressed wildflowers and herbs, organic paper textures, hand-drawn botanical illustrations",
-  naturel:
-    "natural photography style, soft golden daylight, organic linen materials, terracotta clay tones",
-  minimaliste:
-    "minimalist clean composition, generous white space, elegant serif typography, understated luxury",
+const FORMAT_CONTEXT: Record<string, string> = {
+  "1:1":  "square Instagram post format, centered composition",
+  "9:16": "vertical Instagram story or Reel cover, full-bleed composition",
+  "16:9": "horizontal Facebook or LinkedIn banner, wide landscape",
+  "4:5":  "portrait Instagram feed post, vertical crop",
 };
 
-const TYPE_CONTEXT: Record<string, string> = {
-  article: "wellness blog header image, editorial magazine layout",
-  evenement: "wellness retreat event announcement, serene invitation",
-  instagram: "Instagram square post for holistic wellness practitioner",
-  email: "email newsletter header, warm and inviting",
+const STYLE_DESC: Record<string, string> = {
+  botanique:
+    "flat lay photography of fresh herbs, wildflowers and crystals on a cream linen background, warm natural light from the side, vibrant colours, highly detailed botanicals",
+  naturel:
+    "bright lifestyle photography, warm golden hour sunlight, woman's hands holding a plant or crystal, organic textures, inviting and energetic atmosphere",
+  minimaliste:
+    "clean minimalist flat lay, single hero object centred on a white or cream background, crisp professional lighting, bold negative space, high contrast",
+};
+
+const TYPE_BOOST: Record<string, string> = {
+  instagram: "scroll-stopping social media marketing visual, highly engaging Instagram content",
+  reel:      "dynamic eye-catching Reel thumbnail, bold and energetic",
+  story:     "vibrant Instagram Story graphic, strong visual hierarchy",
+  evenement: "professional event promotion visual, aspirational and inviting",
+  newsletter: "warm lifestyle email header, trustworthy and welcoming",
 };
 
 export async function POST(request: Request) {
@@ -28,9 +36,10 @@ export async function POST(request: Request) {
   const { textContext, style, format, contentType } = await request.json();
 
   const styleDesc = STYLE_DESC[style] || STYLE_DESC.botanique;
-  const typeCtx = TYPE_CONTEXT[contentType] || TYPE_CONTEXT.instagram;
+  const typeBoost = TYPE_BOOST[contentType] || TYPE_BOOST.instagram;
+  const formatCtx = FORMAT_CONTEXT[format] || FORMAT_CONTEXT["1:1"];
 
-  const prompt = `${typeCtx}. ${styleDesc}. Warm earthy cream palette, deep forest green accents, soft gold touches. High-end French Canadian wellness brand, naturothérapeute and Reiki master. ${textContext ? `Theme/context: "${String(textContext).slice(0, 120)}"` : ""}. Professional, serene, inviting atmosphere. No text overlay. Soft focus, dreamy quality.`;
+  const prompt = `${typeBoost}, ${formatCtx}. ${styleDesc}. Brand colours: deep forest green (#153328), warm cream (#fdf9f4), soft gold accents. Wellness and naturopathy brand for women. ${textContext ? `Subject: ${String(textContext).slice(0, 100)}.` : ""} Professional photography, sharp focus, vibrant and marketing-ready. No text, no words in image.`;
 
   const response = await fetch(ATLAS_URL, {
     method: "POST",

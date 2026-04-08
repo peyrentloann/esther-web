@@ -21,6 +21,15 @@ interface HistoryItem {
   date: string;
 }
 
+interface GalleryItem {
+  id: string;
+  imageUrl: string;
+  titre: string;
+  category: string;
+  format: string;
+  date: string;
+}
+
 const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
   { value: "instagram", label: "Post Instagram", emoji: "📸" },
   { value: "reel", label: "Réel / Vidéo", emoji: "🎬" },
@@ -55,6 +64,7 @@ const TYPE_CONFIG: Record<IdeaType, { emoji: string; label: string; color: strin
 };
 
 const HISTORY_KEY = "esther_content_history";
+const GALLERY_KEY = "esther_visual_gallery";
 
 export default function ContentGenerator() {
   const [category, setCategory] = useState<Category>("instagram");
@@ -75,11 +85,15 @@ export default function ContentGenerator() {
   const [progressMsg, setProgressMsg] = useState("");
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(HISTORY_KEY);
       if (saved) setHistory(JSON.parse(saved));
+      const savedGallery = localStorage.getItem(GALLERY_KEY);
+      if (savedGallery) setGallery(JSON.parse(savedGallery));
     } catch { /* ignore */ }
   }, []);
 
@@ -94,8 +108,11 @@ export default function ContentGenerator() {
         if (data.status === "completed" || data.status === "succeeded") {
           setProgress(100);
           setProgressMsg("Image prête ✓");
+          const url = data.imageUrl;
+          const idea = ideas[ideaIndex];
+          if (url && idea) saveToGallery(url, idea.titre, visualFormat);
           setTimeout(() => {
-            setGeneratedImages((prev) => ({ ...prev, [ideaIndex]: data.imageUrl }));
+            setGeneratedImages((prev) => ({ ...prev, [ideaIndex]: url }));
             setLoadingVisual(false);
             setPredictionId(null);
           }, 400);
@@ -151,6 +168,30 @@ export default function ContentGenerator() {
     const updated = [item, ...history].slice(0, 15);
     setHistory(updated);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  }
+
+  function saveToGallery(imageUrl: string, titre: string, format: string) {
+    const item: GalleryItem = {
+      id: Date.now().toString(),
+      imageUrl,
+      titre,
+      category,
+      format,
+      date: new Date().toLocaleDateString("fr-CA"),
+    };
+    setGallery((prev) => {
+      const updated = [item, ...prev];
+      localStorage.setItem(GALLERY_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }
+
+  function deleteFromGallery(id: string) {
+    setGallery((prev) => {
+      const updated = prev.filter((g) => g.id !== id);
+      localStorage.setItem(GALLERY_KEY, JSON.stringify(updated));
+      return updated;
+    });
   }
 
   async function generateIdeas() {
@@ -462,6 +503,62 @@ export default function ContentGenerator() {
         <div className="text-center py-16 text-outline space-y-2">
           <p className="text-5xl">✨</p>
           <p className="text-sm">Sélectionne un type de contenu et génère des idées</p>
+        </div>
+      )}
+
+      {/* Gallery */}
+      {gallery.length > 0 && (
+        <div className="space-y-3 pt-4 border-t border-outline-variant/15">
+          <button
+            onClick={() => setGalleryOpen((o) => !o)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-on-surface">🖼️ Mes visuels</p>
+              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">{gallery.length}</span>
+            </div>
+            <span className="text-outline text-xs">{galleryOpen ? "▲ Réduire" : "▼ Voir tout"}</span>
+          </button>
+
+          {galleryOpen && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {gallery.map((item) => (
+                <div key={item.id} className="group relative rounded-xl overflow-hidden bg-surface-container aspect-square">
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.titre}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  {/* Overlay on hover */}
+                  <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-all duration-400 flex flex-col justify-between p-3">
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => deleteFromGallery(item.id)}
+                        className="w-7 h-7 rounded-full bg-white/20 text-white text-xs flex items-center justify-center hover:bg-error/80 transition-colors duration-300"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="space-y-1.5">
+                      <p className="text-white text-xs font-medium line-clamp-2 leading-tight">{item.titre}</p>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full">{item.format}</span>
+                        <span className="text-[10px] text-white/60">{item.date}</span>
+                      </div>
+                      <button
+                        onClick={() => downloadImage(item.imageUrl, parseInt(item.id))}
+                        className="w-full py-1.5 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] text-xs font-medium hover:scale-[1.02] transition-all duration-400"
+                      >
+                        ↓ Télécharger
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
