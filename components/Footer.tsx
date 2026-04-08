@@ -24,7 +24,7 @@ export default function Footer() {
               {[
                 { href: "/reiki", label: "Reiki" },
                 { href: "/soin-hormonal", label: "Soin Hormonal" },
-                { href: "/evenements", label: "Événements" },
+                { href: "/evenements", label: "Événements & Retraites" },
                 { href: "/journal-hormonal", label: "Journal Hormonal" },
                 { href: "/a-propos", label: "À Propos" },
               ].map(({ href, label }) => (
