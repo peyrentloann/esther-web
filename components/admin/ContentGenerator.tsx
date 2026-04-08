@@ -468,7 +468,7 @@ export default function ContentGenerator() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => downloadImage(imgUrl, i)}
-                            className="flex-1 py-2 rounded-full bg-primary text-surface text-sm font-medium hover:bg-primary/90 transition-all duration-400"
+                            className="flex-1 py-2 rounded-full bg-primary-fixed text-primary text-sm font-medium hover:bg-primary-fixed/80 transition-all duration-400"
                           >
                             ↓ Télécharger
                           </button>
