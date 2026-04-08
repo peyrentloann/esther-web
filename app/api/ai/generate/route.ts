@@ -1,7 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { cookies } from "next/headers";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const OR_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const SYSTEM_PROMPT = `Tu es l'assistante de contenu d'Esther Laframboise, naturothérapeute et Maître Reiki à Shefford, QC. Tu rédiges en français québécois, avec un ton chaleureux, expert et ancré dans la nature et le bien-être. Tu évites le jargon médical abusif. Tu valorises l'approche holistique, la connexion corps-esprit-nature. Tu écris toujours en français, jamais en anglais.`;
 
@@ -44,23 +43,50 @@ export async function POST(request: Request) {
   const { type, fields } = await request.json();
   const userPrompt = buildPrompt(type, fields || {});
 
-  const stream = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1500,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userPrompt }],
-    stream: true,
+  const response = await fetch(OR_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "anthropic/claude-sonnet-4-5",
+      max_tokens: 1500,
+      stream: true,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ],
+    }),
   });
 
+  // Parse SSE stream from OpenRouter and pipe only the text deltas
   return new Response(
     new ReadableStream({
       async start(controller) {
-        for await (const event of stream) {
-          if (
-            event.type === "content_block_delta" &&
-            event.delta.type === "text_delta"
-          ) {
-            controller.enqueue(new TextEncoder().encode(event.delta.text));
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const payload = line.slice(6).trim();
+            if (payload === "[DONE]") continue;
+            try {
+              const json = JSON.parse(payload);
+              const text = json.choices?.[0]?.delta?.content;
+              if (text) controller.enqueue(new TextEncoder().encode(text));
+            } catch {
+              // ignore malformed chunks
+            }
           }
         }
         controller.close();

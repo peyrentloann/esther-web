@@ -1,7 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { cookies } from "next/headers";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const OR_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const TYPE_LABELS: Record<string, string> = {
   article: "article de blog sur la naturopathie / santé hormonale / bien-être",
@@ -24,21 +23,29 @@ export async function POST(request: Request) {
       ? `\n\nSujets déjà traités récemment (à éviter) : ${history.slice(0, 8).join(", ")}.`
       : "";
 
-  const response = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 600,
-    messages: [
-      {
-        role: "user",
-        content: `Tu es l'assistante d'Esther Laframboise, naturothérapeute et Maître Reiki à Shefford, QC. Propose 6 idées originales de ${label} pour sa clientèle (femmes, approche holistique, santé féminine, Reiki, naturopathie).${historyNote}
+  const response = await fetch(OR_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "anthropic/claude-haiku-4-5",
+      max_tokens: 600,
+      messages: [
+        {
+          role: "user",
+          content: `Tu es l'assistante d'Esther Laframboise, naturothérapeute et Maître Reiki à Shefford, QC. Propose 6 idées originales de ${label} pour sa clientèle (femmes, approche holistique, santé féminine, Reiki, naturopathie).${historyNote}
 
 Retourne UNIQUEMENT un tableau JSON de 6 chaînes de caractères (titres / idées courtes, max 10 mots chacune), sans markdown, sans explication. Exemple : ["Idée 1", "Idée 2", "Idée 3", "Idée 4", "Idée 5", "Idée 6"]`,
-      },
-    ],
+        },
+      ],
+    }),
   });
 
-  const raw =
-    response.content[0].type === "text" ? response.content[0].text.trim() : "[]";
+  const data = await response.json();
+  const raw = data.choices?.[0]?.message?.content?.trim() ?? "[]";
+
   let ideas: string[] = [];
   try {
     const match = raw.match(/\[[\s\S]*\]/);
