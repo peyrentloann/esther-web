@@ -1,5 +1,7 @@
 import { requireAdmin } from "@/lib/admin-auth";
-export default async function Page() {
+import EventsManager from "@/components/admin/EventsManager";
+
+export default async function AdminEvenements() {
   await requireAdmin();
-  return <p className="text-outline font-serif italic text-2xl pt-20 text-center">Bientôt disponible</p>;
+  return <EventsManager />;
 }
