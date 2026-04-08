@@ -71,6 +71,8 @@ export default function ContentGenerator() {
   const [predictionId, setPredictionId] = useState<string | null>(null);
   const [generatedImages, setGeneratedImages] = useState<Record<number, string>>({});
   const [visualError, setVisualError] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [progressMsg, setProgressMsg] = useState("");
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
@@ -90,9 +92,13 @@ export default function ContentGenerator() {
         const res = await fetch(`/api/ai/visual/status?id=${predictionId}`);
         const data = await res.json();
         if (data.status === "completed" || data.status === "succeeded") {
-          setGeneratedImages((prev) => ({ ...prev, [ideaIndex]: data.imageUrl }));
-          setLoadingVisual(false);
-          setPredictionId(null);
+          setProgress(100);
+          setProgressMsg("Image prête ✓");
+          setTimeout(() => {
+            setGeneratedImages((prev) => ({ ...prev, [ideaIndex]: data.imageUrl }));
+            setLoadingVisual(false);
+            setPredictionId(null);
+          }, 400);
           clearInterval(interval);
         } else if (data.status === "failed") {
           setVisualError("Génération échouée. Réessaie.");
@@ -109,6 +115,33 @@ export default function ContentGenerator() {
     }, 2500);
     return () => clearInterval(interval);
   }, [predictionId, expandedVisual]);
+
+  // Animate progress bar while loading visual
+  const PROGRESS_STEPS = [
+    { at: 2,  msg: "Initialisation du modèle…" },
+    { at: 15, msg: "Composition du visuel…" },
+    { at: 40, msg: "Ajout des détails botaniques…" },
+    { at: 65, msg: "Affinage des couleurs…" },
+    { at: 82, msg: "Finalisation de l'image…" },
+    { at: 90, msg: "Presque prêt…" },
+  ];
+  useEffect(() => {
+    if (!loadingVisual) { setProgress(0); setProgressMsg(""); return; }
+    setProgress(2);
+    setProgressMsg(PROGRESS_STEPS[0].msg);
+    // Advance through steps over ~28 seconds total, slow down near 90%
+    const timings = [3000, 6000, 5000, 5000, 5000];
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    PROGRESS_STEPS.slice(1).forEach((step, i) => {
+      const delay = timings.slice(0, i + 1).reduce((a, b) => a + b, 0);
+      timeouts.push(setTimeout(() => {
+        setProgress(step.at);
+        setProgressMsg(step.msg);
+      }, delay));
+    });
+    return () => timeouts.forEach(clearTimeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingVisual]);
 
   function saveToHistory(titre: string) {
     const item: HistoryItem = {
@@ -363,9 +396,18 @@ export default function ContentGenerator() {
 
                     {/* Loading */}
                     {loadingVisual && (
-                      <div className="flex flex-col items-center gap-2 py-6">
-                        <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-                        <p className="text-xs text-outline">Nano Banana génère ton visuel… ~20 sec</p>
+                      <div className="py-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <p className="text-xs text-outline">{progressMsg}</p>
+                          <p className="text-xs font-medium text-primary">{progress}%</p>
+                        </div>
+                        <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary-fixed rounded-full transition-all duration-1000 ease-out"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <p className="text-[11px] text-outline/50 text-center">Nano Banana Pro génère ton image…</p>
                       </div>
                     )}
 
