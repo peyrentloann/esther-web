@@ -49,10 +49,15 @@ export async function POST(request: Request) {
   });
 
   const data = await response.json();
+  console.log("[visual] Atlas response:", JSON.stringify(data));
+
   const predictionId = data?.data?.id;
 
   if (!predictionId) {
-    return new Response("Failed to start generation", { status: 500 });
+    return Response.json(
+      { error: data?.error || data?.message || JSON.stringify(data) },
+      { status: 500 }
+    );
   }
 
   return Response.json({ predictionId });

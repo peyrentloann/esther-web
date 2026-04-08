@@ -166,10 +166,12 @@ export default function ContentGenerator() {
         }),
       });
       const data = await res.json();
-      if (!data.predictionId) throw new Error("No prediction ID");
+      if (!res.ok || !data.predictionId) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
       setPredictionId(data.predictionId);
-    } catch {
-      setVisualError("Erreur lors du lancement.");
+    } catch (e) {
+      setVisualError(`Erreur : ${e instanceof Error ? e.message : "inconnue"}`);
       setLoadingVisual(false);
     }
   }
@@ -315,12 +317,12 @@ export default function ContentGenerator() {
                               onClick={() => setVisualFormat(f.value)}
                               className={`py-2 px-2 rounded-xl text-xs font-medium transition-all duration-400 ${
                                 visualFormat === f.value
-                                  ? "bg-primary text-surface"
+                                  ? "bg-primary-fixed text-primary"
                                   : "bg-surface-container text-on-surface hover:bg-surface-container-high"
                               }`}
                             >
                               {f.label}
-                              <span className={`block text-[10px] mt-0.5 ${visualFormat === f.value ? "text-surface/60" : "text-outline"}`}>{f.sub}</span>
+                              <span className={`block text-[10px] mt-0.5 ${visualFormat === f.value ? "text-primary/60" : "text-outline"}`}>{f.sub}</span>
                             </button>
                           ))}
                         </div>
@@ -334,7 +336,7 @@ export default function ContentGenerator() {
                               onClick={() => setVisualStyle(s.value)}
                               className={`py-2 px-3 rounded-xl text-xs font-medium transition-all duration-400 text-left ${
                                 visualStyle === s.value
-                                  ? "bg-primary text-surface"
+                                  ? "bg-primary-fixed text-primary"
                                   : "bg-surface-container text-on-surface hover:bg-surface-container-high"
                               }`}
                             >
