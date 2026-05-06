@@ -13,9 +13,10 @@ const BENEFITS = [
 ];
 
 const TESTIMONIALS = [
-  { quote: "En quelques séances, j'ai compris ce que mon corps essayait de me dire depuis des années. Esther a cette capacité rare de tout rendre clair.", name: "Annie B." },
-  { quote: "Ma ménopause est devenue une transition douce grâce à l'accompagnement d'Esther. Je me sens comprise et soutenue à chaque étape.", name: "Diane F." },
-  { quote: "Mon SPM a diminué de 80% en deux mois. L'approche holistique d'Esther est simplement transformatrice.", name: "Catherine M." },
+  {
+    quote: "Esther est la douceur incarnée. Sans jugement et dotée d'une grande empathie, elle me met rapidement en confiance ce qui favorise un échange authentique. Elle offre des soins d'une grande qualité. 💜",
+    name: "Marie Ève",
+  },
 ];
 
 export default function SoinHormonal() {
@@ -54,17 +55,26 @@ export default function SoinHormonal() {
           <Reveal className="space-y-8">
             <span className="text-4xl">♀</span>
             <h2 className="font-serif text-4xl md:text-5xl text-secondary">
-              Reconnecter avec tes cycles
+              Pour qui c&apos;est fait?
             </h2>
             <div className="space-y-6 text-on-surface-variant leading-relaxed text-lg">
               <p>
-                Le soin hormonal est une approche naturopathique personnalisée qui t&apos;aide à
-                comprendre et harmoniser tes hormones féminines à travers toutes les phases de ta
-                vie.
+                Tout le monde peut vivre des débalancements hormonaux. Mes rencontres ciblent
+                majoritairement les femmes qui pensent être en pré-ménopause ou en ménopause,
+                mais j&apos;informe et accompagne aussi les hommes et toute personne qui a
+                besoin d&apos;information à ce niveau.
               </p>
               <p>
-                Ensemble, nous explorons tes cycles, ton alimentation, ton sommeil et ton niveau de
-                stress pour créer un protocole unique, doux et respectueux de ta biologie.
+                Nous faisons ensemble un portrait de votre situation en tenant compte de tous
+                les facteurs <em>bio-psy-sociaux</em> qui pourraient affecter votre santé
+                globale et hormonale. Dans la majorité des cas, une visite médicale sera à
+                prévoir après la rencontre — je vous accompagne pour préparer vos questions et
+                je peux vous référer au privé si vous n&apos;avez pas de médecin de famille.
+              </p>
+              <p className="text-secondary italic">
+                Je suis membre de l&apos;Association des naturothérapeutes du Québec (ANQ) et
+                formée par la Dre Sylvie Demers, sommité en hormonothérapie féminine
+                bio-identique.
               </p>
             </div>
           </Reveal>
@@ -128,25 +138,48 @@ export default function SoinHormonal() {
       {/* ── Témoignages & Infos ── */}
       <section className="py-16 md:py-32 bg-surface px-6 md:px-12">
         <div className="max-w-7xl mx-auto space-y-12 md:space-y-24">
-          <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-12" stagger={0.15}>
+          <Reveal className="max-w-3xl mx-auto">
             {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="p-10 bg-secondary-fixed/20 rounded-2xl relative hover:-translate-y-2 hover:shadow-lg transition-all duration-500">
+              <div
+                key={t.name}
+                className="p-12 bg-secondary-fixed/20 rounded-2xl relative hover:-translate-y-2 hover:shadow-lg transition-all duration-500"
+              >
                 <span className="text-4xl text-secondary/40 absolute -top-5 left-8 bg-surface px-2">
                   &ldquo;
                 </span>
-                <p className="italic text-on-surface-variant mb-8 leading-relaxed">{t.quote}</p>
+                <p className="italic text-on-surface-variant mb-8 leading-relaxed text-lg">
+                  {t.quote}
+                </p>
                 <p className="text-xs tracking-widest font-bold text-secondary uppercase">
                   — {t.name}
                 </p>
               </div>
             ))}
-          </RevealStagger>
+          </Reveal>
+
+          <Reveal className="bg-secondary-fixed/10 rounded-2xl p-10 max-w-3xl mx-auto text-center space-y-4">
+            <span className="text-3xl">📺</span>
+            <h3 className="font-serif text-2xl text-secondary">Loto-méno — un must à voir</h3>
+            <p className="text-on-surface-variant leading-relaxed">
+              Je recommande à toutes mes clientes de visionner l&apos;excellent documentaire{" "}
+              <em>Loto-méno</em> de Véronique Cloutier, qui a permis aux femmes du Québec
+              d&apos;avoir accès aux hormones bio-identiques avec l&apos;assurance maladie.
+            </p>
+            <a
+              href="https://ici.tou.tv/loto-meno/s01"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-secondary font-semibold underline underline-offset-4 hover:opacity-80"
+            >
+              Regarder sur tou.tv →
+            </a>
+          </Reveal>
 
           <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-8" stagger={0.12}>
             {[
-              { icon: "⏱", title: "Durée", detail: "75 à 90 minutes par séance" },
-              { icon: "📍", title: "Format", detail: "Présentiel ou en ligne" },
-              { icon: "💳", title: "Tarif", detail: "Contactez-moi pour détails" },
+              { icon: "⏱", title: "Durée", detail: "Environ 1 heure par séance" },
+              { icon: "📍", title: "Format", detail: "Shefford, en ligne ou à domicile" },
+              { icon: "💳", title: "Tarif", detail: "150$ première (journal inclus) · 100$ suivantes" },
             ].map((info) => (
               <div
                 key={info.title}
@@ -160,6 +193,13 @@ export default function SoinHormonal() {
               </div>
             ))}
           </RevealStagger>
+
+          <Reveal className="text-center text-sm text-outline italic">
+            <p>
+              Reçus disponibles pour assurances privées en naturothérapie. Politique
+              d&apos;annulation : 50% facturé à moins de 24h du rendez-vous.
+            </p>
+          </Reveal>
         </div>
       </section>
 

@@ -7,23 +7,23 @@ import HeroTitle from "@/components/motion/HeroTitle";
 
 const TESTIMONIALS = [
   {
-    quote: "Une expérience transformatrice. Esther a su mettre les mots sur des maux que je portais depuis des années.",
-    name: "Marie-Ève L.",
-    city: "Bromont, QC",
+    quote: "Esther est la douceur incarnée. Sans jugement et dotée d'une grande empathie, elle me met rapidement en confiance. C'est pourquoi je l'appelle ma petite fée 🧚🏼‍♀️",
+    name: "Marie Ève",
+    city: "Reiki",
     color: "bg-secondary-fixed",
     elevated: false,
   },
   {
-    quote: "Le soin hormonal a changé ma relation avec mon cycle. Je me sens enfin en contrôle et apaisée.",
-    name: "Sophie G.",
-    city: "Magog, QC",
+    quote: "Sa voix et son tambour me permettent de déloger ce qui est bloqué en moi. Une dose parfaite de béatitude et d'alignement.",
+    name: "Claudine D.",
+    city: "Reiki",
     color: "bg-primary-fixed",
     elevated: true,
   },
   {
-    quote: "Esther est d'une bienveillance rare. Ses retraites sont des parenthèses enchantées indispensables.",
-    name: "Julie R.",
-    city: "Sherbrooke, QC",
+    quote: "Sa voix de cœur et ses instruments sont sa couleur unique et si riche. Un équilibre inspirant « entre ciel et terre ».",
+    name: "Estelle",
+    city: "Formation Reiki",
     color: "bg-tertiary-fixed",
     elevated: false,
   },
@@ -44,8 +44,9 @@ export default function Home() {
             />
             <Reveal delay={0.5} y={20}>
               <p className="text-xl text-on-surface-variant mb-10 max-w-xl leading-relaxed">
-                Esther Laframboise — Naturothérapeute certifiée &amp; Maître Reiki à Shefford. Une
-                approche holistique pour harmoniser votre santé féminine.
+                Naturothérapeute &amp; Maître Reiki à Shefford. Soins énergétiques par la voix
+                et les instruments, accompagnement en santé hormonale féminine — ou les deux
+                combinés.
               </p>
             </Reveal>
             <Reveal delay={0.7} y={16}>
@@ -174,14 +175,15 @@ export default function Home() {
           <Reveal delay={0.2} className="space-y-8">
             <h2 className="font-serif text-5xl text-primary leading-tight">Qui est Esther?</h2>
             <p className="text-lg text-on-surface-variant leading-relaxed italic font-serif">
-              &ldquo;Ma mission est de vous aider à reconnecter avec la sagesse innée de votre
-              corps. À travers la naturopathie et le Reiki, nous créons un espace sacré pour la
-              guérison.&rdquo;
+              &ldquo;Ma philosophie est de soutenir la personne pour qu&apos;elle cultive son
+              pouvoir d&apos;agir et exerce son libre-arbitre. Informer, éclairer, questionner
+              et réfléchir avec elle, dans le respect et l&apos;accueil.&rdquo;
             </p>
             <p className="text-lg text-on-surface leading-relaxed">
-              Depuis plus de 10 ans, j&apos;accompagne les femmes de Shefford et d&apos;ailleurs
-              vers une harmonie hormonale et une paix intérieure durable. Ma pratique combine
-              rigueur scientifique et intuition profonde.
+              Maître Reiki depuis janvier 2024 et membre de l&apos;Association des
+              naturothérapeutes du Québec. Mon parcours combine 12 ans en gestion communautaire,
+              une formation en intervention auprès des femmes, et une expérience personnelle
+              forte avec la santé hormonale.
             </p>
             <Link
               href="/a-propos"

@@ -13,16 +13,35 @@ const BENEFITS = [
 ];
 
 const TOOLS = [
-  { title: "Cristaux", desc: "Pierres précieuses sélectionnées pour ancrer et purifier vos énergies spécifiques.", icon: "💎", bg: "bg-primary-fixed/40" },
-  { title: "Bols chantants", desc: "Fréquences sonores pour harmoniser les cellules et apaiser le système nerveux.", icon: "🔔", bg: "bg-tertiary-fixed/40" },
-  { title: "Pendule", desc: "Outil de diagnostic pour identifier avec précision les blocages des chakras.", icon: "🔮", bg: "bg-primary-fixed/20" },
-  { title: "Huiles essentielles", desc: "Aromathérapie ciblée pour soutenir l'ouverture émotionnelle durant la séance.", icon: "🌿", bg: "bg-tertiary-fixed/20" },
+  { title: "Shruti Box", desc: "Boîte à vent indienne au son proche de la cornemuse. Idéale pour les soins de groupe — son qui porte loin.", icon: "🎐", bg: "bg-primary-fixed/40" },
+  { title: "Quartzophone", desc: "Xylophone en cristal de quartz, fréquence ajustée au cœur. Provient de la mine de Cristal de Bonsecours.", icon: "💎", bg: "bg-tertiary-fixed/40" },
+  { title: "Tank Drum", desc: "Percussion artisanale québécoise faite de bonbonnes recyclées. Gamme C celtique mineur — vibrations apaisantes.", icon: "🪘", bg: "bg-primary-fixed/20" },
+  { title: "Tambours", desc: "Peau de Bison et de Wapiti (fabriqué à la main). Le rythme s'apparente à un cœur qui bat.", icon: "🥁", bg: "bg-tertiary-fixed/20" },
+  { title: "Bols de Cristal", desc: "Bols 18 et 20 pouces, utilisés en groupe Reiki. Vibration en duo puissante et durable.", icon: "🔔", bg: "bg-primary-fixed/40" },
+  { title: "Voix & Kotodamas", desc: "Sons sacrés propres au Reiki qui amplifient le soin. Ma signature unique.", icon: "✦", bg: "bg-tertiary-fixed/40" },
 ];
 
 const TESTIMONIALS = [
-  { quote: "Une séance avec Esther est un voyage. J'ai ressenti une chaleur apaisante et une libération émotionnelle que je n'avais jamais connue auparavant.", name: "Marie-Claude P." },
-  { quote: "Maître Reiki d'une grande écoute. Esther sait exactement où porter son attention. Je repars toujours avec une clarté d'esprit incroyable.", name: "Julien R." },
-  { quote: "Le cadre à Shefford est magnifique et l'énergie d'Esther est si bienveillante. Mes douleurs chroniques ont diminué dès la première séance.", name: "Sophie L." },
+  {
+    quote: "Esther est la douceur incarnée. De sa magnifique personne émane tant de bienveillance et d'ouverture. Sans jugement et dotée d'une grande empathie, elle me met rapidement en confiance. Elle offre des soins d'une grande qualité. C'est pourquoi je l'appelle ma petite fée 🧚🏼‍♀️",
+    name: "Marie Ève",
+  },
+  {
+    quote: "Esther est précieuse dans mon processus d'évolution intérieure. Sa voix et son tambour me permettent de déloger ce qui est bloqué en moi. Une dose parfaite de béatitude et d'alignement. 💜",
+    name: "Claudine D.",
+  },
+  {
+    quote: "J'adore Esther, pour sa douceur, pour l'attention qu'elle porte à ce que je lui nomme. Un soin avec elle m'amène dans une profondeur, et sa voix céleste dans mon ressenti. 😌",
+    name: "Josée T.",
+  },
+  {
+    quote: "Sa voix de cœur et l'accompagnement de ses instruments sont sa couleur unique et si riche ! Je dirais qu'elle a un équilibre inspirant « entre ciel et terre ».",
+    name: "Estelle",
+  },
+  {
+    quote: "Esther est une personne de cœur, vraie, qui possède une belle humilité. Sa voix résonne au son de ses instruments et crée une ambiance propice à la guérison.",
+    name: "Marilou",
+  },
 ];
 
 export default function Reiki() {
@@ -62,17 +81,21 @@ export default function Reiki() {
           <Reveal className="space-y-8">
             <span className="text-4xl text-on-tertiary-container">✦</span>
             <h2 className="font-serif text-4xl md:text-5xl text-primary">
-              L&apos;art sacré de l&apos;énergie
+              C&apos;est quoi le Reiki?
             </h2>
             <div className="space-y-6 text-on-surface-variant leading-relaxed text-lg">
               <p>
-                Le Reiki est bien plus qu&apos;une simple relaxation ; c&apos;est un dialogue
-                silencieux entre votre corps et l&apos;énergie vitale universelle. En tant que
-                Maître Reiki, j&apos;agis comme un canal pour harmoniser vos centres énergétiques.
+                Reiki signifie <em>énergie universelle</em> en japonais. Ce soin a été développé
+                par Mikao Usui Sensei au Japon il y a un peu plus d&apos;un siècle. J&apos;ai
+                reçu les initiations nécessaires pour en transmettre l&apos;énergie sans utiliser
+                la mienne.
               </p>
               <p>
-                Cette approche holistique permet de libérer les blocages émotionnels et physiques,
-                ramenant votre être vers son état naturel d&apos;équilibre et de paix intérieure.
+                Le Reiki est transmis par les mains, mais également par les yeux, le souffle et
+                la voix. Il a des sons propres — les <strong>Kotodamas</strong> — qui viennent
+                amplifier le soin. La couleur de mes soins vient de l&apos;utilisation de ces
+                sons accompagnés d&apos;instruments variés : tank drum, shruti box, quartzophone
+                et mes tambours.
               </p>
             </div>
           </Reveal>
@@ -125,7 +148,7 @@ export default function Reiki() {
               amplifient les fréquences de guérison.
             </p>
           </Reveal>
-          <RevealStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" stagger={0.1}>
+          <RevealStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" stagger={0.1}>
             {TOOLS.map((t) => (
               <div
                 key={t.title}
@@ -181,9 +204,9 @@ export default function Reiki() {
 
           <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-8" stagger={0.12}>
             {[
-              { icon: "⏱", title: "Durée", detail: "60 à 90 minutes par soin" },
-              { icon: "📍", title: "Format", detail: "Présentiel ou en ligne" },
-              { icon: "💳", title: "Tarif", detail: "Contactez-moi pour détails" },
+              { icon: "⏱", title: "Durée", detail: "1h30 (1ère rencontre) · 1h à 1h30 (suivantes)" },
+              { icon: "📍", title: "Format", detail: "Shefford, en ligne ou à domicile" },
+              { icon: "💳", title: "Tarif", detail: "150$ première · 100$ suivantes · 75$ mensuel" },
             ].map((info) => (
               <div
                 key={info.title}
@@ -197,6 +220,13 @@ export default function Reiki() {
               </div>
             ))}
           </RevealStagger>
+
+          <Reveal className="mt-12 text-center text-sm text-outline italic">
+            <p>
+              Politique d&apos;annulation : 50% de la rencontre facturé pour toute annulation à
+              moins de 24h du rendez-vous.
+            </p>
+          </Reveal>
         </div>
       </section>
 

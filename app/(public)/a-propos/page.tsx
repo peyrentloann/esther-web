@@ -4,10 +4,12 @@ import Reveal from "@/components/motion/Reveal";
 import RevealStagger from "@/components/motion/RevealStagger";
 
 const CERTIFICATIONS = [
-  { year: "2022 — 2023", title: "Maîtrise Reiki", org: "Institut de Reiki du Québec", desc: "Formation complète jusqu'au grade de Maître Reiki, techniques avancées d'harmonisation énergétique." },
-  { year: "2019 — 2021", title: "Diplôme en Naturothérapie", org: "École Supérieure de Naturopathie", desc: "Formation intensive en santé holistique, phytothérapie, nutrition thérapeutique et hygiène de vie." },
-  { year: "2018", title: "Spécialisation en Santé Hormonale", org: "Formation continue", desc: "Accompagnement des cycles féminins, de la puberté à la post-ménopause." },
-  { year: "2015 — 2018", title: "Certification en Aromathérapie", org: "Association québécoise d'aromathérapie", desc: "Utilisation thérapeutique des huiles essentielles en complément des soins énergétiques." },
+  { year: "2024 — actuel", title: "Membre ANQ", org: "Association des naturothérapeutes du Québec", desc: "Reçus disponibles pour assurances privées en naturothérapie." },
+  { year: "2024", title: "Hormonothérapie féminine bio-identique", org: "Dre Sylvie Demers", desc: "Formation intensive avec une sommité en la matière des hormones féminines." },
+  { year: "2024", title: "Élixir de fleurs & Aromathérapie", org: "École de Naturothérapie du Québec", desc: "Approches complémentaires aux soins énergétiques et hormonaux." },
+  { year: "2019 — 2024", title: "Reiki Usui niveaux 1 à 4", org: "Valérie Berthelette, Homéovie", desc: "Maître enseignant depuis janvier 2024. Pratique à temps plein depuis 2 ans." },
+  { year: "2003 — 2006", title: "Baccalauréat Administration — Ressources Humaines", org: "UQAM Téluq", desc: "Compétences de leader et communicatrice développées en parallèle de la vie de famille." },
+  { year: "1996 — 1999", title: "Technique d'intervention en délinquance", org: "Cégep Ahuntsic", desc: "Premier parcours en intervention auprès des femmes victimes de violence conjugale." },
 ];
 
 const PILLARS = [
@@ -47,10 +49,12 @@ export default function APropos() {
               </p>
             </div>
             <p className="text-lg leading-relaxed text-on-surface-variant max-w-xl">
-              J&apos;accompagne les femmes à retrouver leur équilibre vital à travers une approche
-              qui unit la sagesse ancestrale du Reiki et la rigueur de la naturothérapie moderne. Ma
-              mission est de créer un espace de guérison où votre corps et votre esprit peuvent
-              enfin s&apos;harmoniser.
+              Riche de mes expériences personnelles et de mes formations en soins énergétiques
+              Reiki et en santé hormonale féminine, j&apos;offre des rencontres qui répondent à
+              l&apos;un ou l&apos;autre des domaines — ou aux deux combinés. Dans les soins
+              Reiki, je me distingue par l&apos;utilisation de ma <em>voix</em> et
+              d&apos;<em>instruments de musique</em> pour vous faire vivre une expérience
+              transformatrice douce et puissante à la fois.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <div className="flex items-center gap-3 bg-surface-container-low px-6 py-3 rounded-full border border-outline-variant/15">
@@ -87,20 +91,22 @@ export default function APropos() {
             </Reveal>
             <Reveal delay={0.2} className="md:col-span-7 space-y-6">
               <h2 className="font-serif text-4xl text-primary">
-                Au commencement était le besoin de lenteur
+                Un parcours qui m&apos;a ramenée à mon essence
               </h2>
               <p className="text-lg leading-relaxed text-on-surface-variant">
-                Mon voyage n&apos;a pas commencé dans un cabinet de consultation, mais dans le
-                tumulte d&apos;une vie qui allait trop vite. C&apos;est à travers mes propres défis
-                de santé hormonale que j&apos;ai découvert la puissance de la naturopathie. Ce fut
-                une révélation : notre corps ne nous trahit jamais, il nous parle simplement un
-                langage que nous avons oublié d&apos;écouter.
+                Depuis mon adolescence, la psychologie et la croissance humaine me fascinent.
+                J&apos;ai d&apos;abord étudié en intervention en délinquance et débuté mon
+                parcours auprès des femmes victimes de violence conjugale. Plus tard, j&apos;ai
+                amorcé un baccalauréat en administration des ressources humaines, et travaillé
+                plus de 12 ans comme gestionnaire dans le milieu communautaire.
               </p>
               <p className="text-lg leading-relaxed text-on-surface-variant">
-                Après des années d&apos;études et d&apos;expérimentations personnelles, j&apos;ai
-                décidé de dédier ma vie à aider les autres à traduire ces messages. La rencontre
-                avec le Reiki a été le chaînon manquant, apportant la dimension énergétique
-                nécessaire pour une guérison complète.
+                Ma vie a pris un tournant à 180 degrés avec un changement de carrière qui
+                n&apos;était pas prévu à mon agenda. J&apos;adhère à la maxime d&apos;Aldous
+                Huxley : <em>&laquo;&nbsp;L&apos;expérience ce n&apos;est pas ce qui nous
+                arrive, mais ce que nous faisons de ce qui nous arrive.&nbsp;&raquo;</em> J&apos;ai
+                choisi que ce changement me permette de réinventer ma vie et de plonger à la
+                source de ce que j&apos;avais vraiment envie d&apos;ÊTRE.
               </p>
             </Reveal>
           </div>
@@ -109,17 +115,29 @@ export default function APropos() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-20 items-center">
             <Reveal className="md:col-span-7 order-2 md:order-1 space-y-6">
               <h2 className="font-serif text-4xl text-primary">
-                Une philosophie ancrée dans la terre
+                Pourquoi le Reiki et la santé hormonale
               </h2>
               <p className="text-lg leading-relaxed text-on-surface-variant">
-                Je ne crois pas aux solutions miracles ou aux protocoles rigides. Chaque individu
-                est un écosystème unique. Mon approche fusionne l&apos;écoute attentive de vos
-                symptômes physiques avec une compréhension profonde de vos blocages émotionnels.
+                Le Reiki est arrivé par référence d&apos;une acupunctrice. Je ne comprenais pas
+                rationnellement comment cela fonctionnait, mais mon corps, mes émotions, mon
+                équilibre s&apos;en portaient mieux. C&apos;était bon pour moi, alors j&apos;ai
+                continué. J&apos;ai découvert avec ce soin que ma grande sensibilité était une
+                <em> force</em> et non une faiblesse. J&apos;ai suivi les niveaux 1 à 3 entre
+                2019 et 2022, puis complété ma formation comme maître enseignant en janvier
+                2024. Cela fait deux ans que je suis à temps plein dans ma pratique.
               </p>
               <p className="text-lg leading-relaxed text-on-surface-variant">
-                Ici, nous prenons le temps. Nous cultivons la patience. Nous apprenons à travailler
-                avec les cycles de la nature plutôt que de lutter contre eux. C&apos;est cette
-                douceur radicale qui permet les transformations les plus durables.
+                Pour la santé hormonale, en 2024, j&apos;ai eu accès à un atelier sur les
+                hormones féminines. À 44 ans, je ne pensais pas du tout être rendue dans cette
+                période de ma vie. Pourtant, après <strong>7 ans d&apos;insomnie</strong> et
+                <strong> 9 ans de règles hémorragiques</strong>, j&apos;avais essayé beaucoup de
+                choses et j&apos;étais au bout de mes ressources. Mon parcours personnel m&apos;a
+                convaincue que je devais et pouvais aider les femmes à ce niveau.
+              </p>
+              <p className="text-lg leading-relaxed text-primary italic">
+                Ma philosophie : soutenir la personne pour qu&apos;elle cultive son pouvoir
+                d&apos;agir et exerce son libre-arbitre. Informer, éclairer, questionner et
+                réfléchir <em>avec</em> elle, dans le respect et l&apos;accueil.
               </p>
             </Reveal>
             <Reveal delay={0.2} y={40} className="md:col-span-5 order-1 md:order-2">
