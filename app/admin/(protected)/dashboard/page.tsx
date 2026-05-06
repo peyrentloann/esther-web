@@ -20,68 +20,82 @@ export default async function Dashboard() {
     day: "numeric",
   });
 
-  let supabase;
+  let weekCount = 0;
+  let pendingCount = 0;
+  let clientsCount = 0;
+  let upcoming: Array<{
+    id: string;
+    starts_at: string;
+    client_name: string;
+    service: string;
+    format: string;
+  }> = [];
+  let setupErr: string | null = null;
+  let googleOk = false;
+
   try {
-    supabase = getServiceClient();
+    const supabase = getServiceClient();
+    const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [weekRes, pendingRes, clientsRes, upcomingRes] = await Promise.all([
+      supabase
+        .from("appointments")
+        .select("*", { count: "exact", head: true })
+        .gte("starts_at", now.toISOString())
+        .lte("starts_at", weekFromNow.toISOString())
+        .neq("status", "cancelled"),
+      supabase
+        .from("appointments")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending"),
+      supabase
+        .from("appointments")
+        .select("client_email", { count: "exact", head: true })
+        .gte("created_at", monthAgo.toISOString()),
+      supabase
+        .from("appointments")
+        .select("*")
+        .gte("starts_at", now.toISOString())
+        .neq("status", "cancelled")
+        .order("starts_at", { ascending: true })
+        .limit(5),
+    ]);
+
+    if (weekRes.error || upcomingRes.error) {
+      setupErr = weekRes.error?.message || upcomingRes.error?.message || "Erreur DB";
+    } else {
+      weekCount = weekRes.count ?? 0;
+      pendingCount = pendingRes.count ?? 0;
+      clientsCount = clientsRes.count ?? 0;
+      upcoming = upcomingRes.data ?? [];
+    }
   } catch (e) {
+    setupErr = (e as Error).message;
+  }
+
+  if (setupErr) {
     return (
       <>
         <header className="mb-12">
           <h2 className="font-serif text-4xl text-primary mb-2">Bonjour Esther 👋</h2>
           <p className="text-outline capitalize">{today}</p>
         </header>
-        <SetupNeeded message={(e as Error).message} />
+        <SetupNeeded message={setupErr} />
       </>
     );
   }
 
-  const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-  const [weekRes, pendingRes, clientsRes, upcomingRes] = await Promise.all([
-    supabase
-      .from("appointments")
-      .select("*", { count: "exact", head: true })
-      .gte("starts_at", now.toISOString())
-      .lte("starts_at", weekFromNow.toISOString())
-      .neq("status", "cancelled"),
-    supabase
-      .from("appointments")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "pending"),
-    supabase
-      .from("appointments")
-      .select("client_email", { count: "exact", head: true })
-      .gte("created_at", monthAgo.toISOString()),
-    supabase
-      .from("appointments")
-      .select("*")
-      .gte("starts_at", now.toISOString())
-      .neq("status", "cancelled")
-      .order("starts_at", { ascending: true })
-      .limit(5),
-  ]);
-
-  // If table doesn't exist (or any error), show setup screen
-  if (weekRes.error || upcomingRes.error) {
-    return (
-      <>
-        <header className="mb-12">
-          <h2 className="font-serif text-4xl text-primary mb-2">Bonjour Esther 👋</h2>
-          <p className="text-outline capitalize">{today}</p>
-        </header>
-        <SetupNeeded message={weekRes.error?.message || upcomingRes.error?.message} />
-      </>
-    );
+  try {
+    googleOk = await isGoogleConnected();
+  } catch {
+    googleOk = false;
   }
-
-  const googleOk = await isGoogleConnected();
-  const upcoming = upcomingRes.data ?? [];
 
   const stats = [
-    { label: "RDV cette semaine", value: weekRes.count ?? 0, icon: "📅" },
-    { label: "En attente de confirmation", value: pendingRes.count ?? 0, icon: "⏳" },
-    { label: "Nouvelles clientes (30j)", value: clientsRes.count ?? 0, icon: "👥" },
+    { label: "RDV cette semaine", value: weekCount, icon: "📅" },
+    { label: "En attente de confirmation", value: pendingCount, icon: "⏳" },
+    { label: "Nouvelles clientes (30j)", value: clientsCount, icon: "👥" },
     {
       label: "Google Calendar",
       value: googleOk ? "✓" : "⚠",

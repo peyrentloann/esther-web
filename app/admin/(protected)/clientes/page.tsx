@@ -20,39 +20,41 @@ const SERVICE_LABEL: Record<string, string> = {
 };
 
 export default async function ClientesPage() {
-  let supabase;
+  type ApptRow = {
+    client_email: string;
+    client_name: string;
+    client_phone: string | null;
+    service: string;
+    starts_at: string;
+  };
+  let appointments: ApptRow[] = [];
+  let setupErr: string | null = null;
   try {
-    supabase = getServiceClient();
+    const supabase = getServiceClient();
+    const { data, error } = await supabase
+      .from("appointments")
+      .select("client_email, client_name, client_phone, service, starts_at")
+      .order("starts_at", { ascending: false });
+    if (error) setupErr = error.message;
+    else appointments = (data ?? []) as ApptRow[];
   } catch (e) {
-    return (
-      <>
-        <header className="mb-12">
-          <h2 className="font-serif text-4xl text-primary mb-2">Clientes</h2>
-        </header>
-        <SetupNeeded message={(e as Error).message} />
-      </>
-    );
+    setupErr = (e as Error).message;
   }
 
-  const { data: appointments, error } = await supabase
-    .from("appointments")
-    .select("client_email, client_name, client_phone, service, starts_at")
-    .order("starts_at", { ascending: false });
-
-  if (error) {
+  if (setupErr) {
     return (
       <>
         <header className="mb-12">
           <h2 className="font-serif text-4xl text-primary mb-2">Clientes</h2>
         </header>
-        <SetupNeeded message={error.message} />
+        <SetupNeeded message={setupErr} />
       </>
     );
   }
 
   // Group by email
   const map = new Map<string, Client>();
-  for (const a of appointments ?? []) {
+  for (const a of appointments) {
     const existing = map.get(a.client_email);
     if (existing) {
       existing.totalAppointments++;

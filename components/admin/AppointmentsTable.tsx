@@ -7,7 +7,7 @@ import {
   deleteAppointment,
 } from "@/app/admin/(protected)/rendez-vous/actions";
 
-type Appointment = {
+export type AppointmentRow = {
   id: string;
   starts_at: string;
   duration_min: number;
@@ -20,6 +20,7 @@ type Appointment = {
   google_event_id: string | null;
   created_at: string;
 };
+type Appointment = AppointmentRow;
 
 const STATUS = {
   pending: { label: "En attente", classes: "bg-tertiary-fixed text-tertiary" },
