@@ -3,6 +3,7 @@ import Image from "next/image";
 import Reveal from "@/components/motion/Reveal";
 import RevealStagger from "@/components/motion/RevealStagger";
 import SwipeCarousel from "@/components/SwipeCarousel";
+import DemandeSpecialeCallout from "@/components/DemandeSpecialeCallout";
 
 const BENEFITS = [
   { icon: "🧠", title: "Réduction du stress", desc: "Libérez les tensions accumulées pour un calme mental immédiat." },
@@ -167,6 +168,9 @@ export default function Reiki() {
           </RevealStagger>
         </div>
       </section>
+
+      {/* ── Demandes spéciales ── */}
+      <DemandeSpecialeCallout variant="inline" />
 
       {/* ── CTA milieu ── */}
       <section id="rendez-vous" className="py-24 bg-primary px-6">

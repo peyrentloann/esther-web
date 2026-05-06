@@ -12,7 +12,6 @@ const links = [
   { href: "/soin-hormonal", label: "Soin Hormonal" },
   { href: "/evenements", label: "Événements & Retraites" },
   { href: "/journal-hormonal", label: "Journal" },
-  { href: "/demandes-speciales", label: "Demandes spéciales" },
   { href: "/a-propos", label: "À Propos" },
 ];
 

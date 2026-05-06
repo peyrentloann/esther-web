@@ -5,6 +5,7 @@ import Reveal from "@/components/motion/Reveal";
 import RevealStagger from "@/components/motion/RevealStagger";
 import HeroTitle from "@/components/motion/HeroTitle";
 import SwipeCarousel from "@/components/SwipeCarousel";
+import DemandeSpecialeCallout from "@/components/DemandeSpecialeCallout";
 
 const TESTIMONIALS = [
   {
@@ -167,6 +168,9 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
+
+      {/* ── Demandes spéciales ── */}
+      <DemandeSpecialeCallout variant="hero" />
 
       {/* ── À propos teaser ── */}
       <section className="py-24 bg-primary-fixed/30 overflow-hidden">

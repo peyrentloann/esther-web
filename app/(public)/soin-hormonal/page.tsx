@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Reveal from "@/components/motion/Reveal";
 import RevealStagger from "@/components/motion/RevealStagger";
+import DemandeSpecialeCallout from "@/components/DemandeSpecialeCallout";
 
 const BENEFITS = [
   { icon: "🌀", title: "Régulation des cycles", desc: "Retrouvez un cycle harmonieux et prévisible mois après mois." },
@@ -116,6 +117,9 @@ export default function SoinHormonal() {
           </RevealStagger>
         </div>
       </section>
+
+      {/* ── Demandes spéciales ── */}
+      <DemandeSpecialeCallout variant="inline" />
 
       {/* ── CTA milieu ── */}
       <section id="rendez-vous" className="py-24 px-6" style={{ background: "#874f48" }}>
