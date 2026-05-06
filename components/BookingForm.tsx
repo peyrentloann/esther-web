@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { createBooking } from "@/lib/booking";
 
 type Service = "reiki" | "soin-hormonal" | "demandes-speciales" | null;
 type Format = "presentiel" | "en-ligne" | null;
@@ -63,16 +64,36 @@ export default function BookingForm({ defaultService }: { defaultService?: strin
     consent: false,
   });
 
+  const [submitting, startTransition] = useTransition();
+
   const progress = (step / 5) * 100;
 
   const nextStep = () => setStep((s) => Math.min(s + 1, 5));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
-  const handleSubmit = async () => {
-    // Placeholder — will connect to Supabase
-    console.log("Booking submitted:", data);
-    toast.success("Rendez-vous confirmé! Vous recevrez un email de confirmation.");
-    setDone(true);
+  const handleSubmit = () => {
+    if (!data.service || !data.format || !data.date || !data.time) return;
+    const [h, m] = data.time.replace("h", ":").split(":");
+    const isoLocal = `${data.date}T${h.padStart(2, "0")}:${(m || "00").padStart(2, "0")}:00`;
+    const startsAt = new Date(isoLocal).toISOString();
+
+    startTransition(async () => {
+      const res = await createBooking({
+        service: data.service!,
+        format: data.format!,
+        starts_at: startsAt,
+        client_name: data.name,
+        client_email: data.email,
+        client_phone: data.phone || undefined,
+        newsletter_opt_in: data.consent,
+      });
+      if (res.ok) {
+        toast.success("Rendez-vous confirmé! Vous recevrez un courriel de confirmation.");
+        setDone(true);
+      } else {
+        toast.error(res.error || "Erreur lors de l'enregistrement");
+      }
+    });
   };
 
   if (done) {
@@ -420,9 +441,10 @@ export default function BookingForm({ defaultService }: { defaultService?: strin
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-1 bg-primary text-on-primary py-5 px-8 text-sm uppercase tracking-[0.25em] font-label flex items-center justify-center gap-4 hover:bg-primary/95 transition-all active:scale-[0.98]"
+              disabled={submitting}
+              className="flex-1 bg-primary text-on-primary py-5 px-8 text-sm uppercase tracking-[0.25em] font-label flex items-center justify-center gap-4 hover:bg-primary/95 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-wait"
             >
-              Confirmer mon rendez-vous ✓
+              {submitting ? "Enregistrement..." : "Confirmer mon rendez-vous ✓"}
             </button>
           </div>
         )}

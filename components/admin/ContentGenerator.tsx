@@ -101,11 +101,24 @@ export default function ContentGenerator() {
   const [savedIdeas, setSavedIdeas] = useState<SavedIdea[]>([]);
   const [savedOpen, setSavedOpen] = useState(false);
 
-  // Plan d'action per idea
+  // Plan d'action per idea (main)
   const [planContent, setPlanContent] = useState<Record<number, string>>({});
   const [loadingPlan, setLoadingPlan] = useState<number | null>(null);
   const [planOpen, setPlanOpen] = useState<Record<number, boolean>>({});
   const [planCopied, setPlanCopied] = useState<number | null>(null);
+
+  // Plan + visual for saved ideas (string keys = savedIdea.id)
+  const [planContentSaved, setPlanContentSaved] = useState<Record<string, string>>({});
+  const [loadingPlanSaved, setLoadingPlanSaved] = useState<string | null>(null);
+  const [planOpenSaved, setPlanOpenSaved] = useState<Record<string, boolean>>({});
+  const [planCopiedSaved, setPlanCopiedSaved] = useState<string | null>(null);
+  const [expandedVisualSaved, setExpandedVisualSaved] = useState<string | null>(null);
+  const [generatedImagesSaved, setGeneratedImagesSaved] = useState<Record<string, string>>({});
+  const [predictionIdSaved, setPredictionIdSaved] = useState<string | null>(null);
+  const [loadingVisualSaved, setLoadingVisualSaved] = useState(false);
+  const [progressSaved, setProgressSaved] = useState(0);
+  const [progressMsgSaved, setProgressMsgSaved] = useState("");
+  const [visualErrorSaved, setVisualErrorSaved] = useState("");
 
   useEffect(() => {
     try {
@@ -153,6 +166,60 @@ export default function ContentGenerator() {
     }, 2500);
     return () => clearInterval(interval);
   }, [predictionId, expandedVisual]);
+
+  // Poll visual result for saved ideas
+  useEffect(() => {
+    if (!predictionIdSaved || !expandedVisualSaved) return;
+    const savedId = expandedVisualSaved;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/ai/visual/status?id=${predictionIdSaved}`);
+        const data = await res.json();
+        if (data.status === "completed" || data.status === "succeeded") {
+          setProgressSaved(100);
+          setProgressMsgSaved("Image prête ✓");
+          const url = data.imageUrl;
+          const si = savedIdeas.find((s) => s.id === savedId);
+          if (url && si) saveToGallery(url, si.titre, visualFormat);
+          setTimeout(() => {
+            setGeneratedImagesSaved((prev) => ({ ...prev, [savedId]: url }));
+            setLoadingVisualSaved(false);
+            setPredictionIdSaved(null);
+          }, 400);
+          clearInterval(interval);
+        } else if (data.status === "failed") {
+          setVisualErrorSaved("Génération échouée. Réessaie.");
+          setLoadingVisualSaved(false);
+          setPredictionIdSaved(null);
+          clearInterval(interval);
+        }
+      } catch {
+        setVisualErrorSaved("Erreur réseau.");
+        setLoadingVisualSaved(false);
+        setPredictionIdSaved(null);
+        clearInterval(interval);
+      }
+    }, 2500);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [predictionIdSaved, expandedVisualSaved]);
+
+  // Animate progress bar for saved visuals
+  useEffect(() => {
+    if (!loadingVisualSaved) { setProgressSaved(0); setProgressMsgSaved(""); return; }
+    setProgressSaved(2); setProgressMsgSaved("Initialisation du modèle…");
+    const steps = [
+      { at: 15, msg: "Composition du visuel…", delay: 3000 },
+      { at: 40, msg: "Ajout des détails botaniques…", delay: 9000 },
+      { at: 65, msg: "Affinage des couleurs…", delay: 14000 },
+      { at: 82, msg: "Finalisation de l'image…", delay: 19000 },
+      { at: 90, msg: "Presque prêt…", delay: 24000 },
+    ];
+    const timeouts = steps.map((s) =>
+      setTimeout(() => { setProgressSaved(s.at); setProgressMsgSaved(s.msg); }, s.delay)
+    );
+    return () => timeouts.forEach(clearTimeout);
+  }, [loadingVisualSaved]);
 
   // Animate progress bar while loading visual
   const PROGRESS_STEPS = [
@@ -260,6 +327,56 @@ export default function ContentGenerator() {
     await navigator.clipboard.writeText(caption);
     setPlanCopied(index * 100); // use *100 offset to distinguish from "copy all"
     setTimeout(() => setPlanCopied(null), 2000);
+  }
+
+  async function generatePlanSaved(saved: SavedIdea) {
+    const id = saved.id;
+    setPlanOpenSaved((p) => ({ ...p, [id]: true }));
+    setPlanContentSaved((p) => ({ ...p, [id]: "" }));
+    setLoadingPlanSaved(id);
+    try {
+      const res = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "plan",
+          fields: { titre: saved.titre, type: TYPE_CONFIG[saved.type]?.label || saved.type, caption: saved.caption || "", scriptIdea: saved.scriptIdea || "" },
+        }),
+      });
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        setPlanContentSaved((p) => ({ ...p, [id]: (p[id] || "") + decoder.decode(value, { stream: true }) }));
+      }
+    } catch {
+      setPlanContentSaved((p) => ({ ...p, [id]: "Erreur lors de la génération." }));
+    }
+    setLoadingPlanSaved(null);
+  }
+
+  async function generateVisualSaved(saved: SavedIdea) {
+    const id = saved.id;
+    setVisualErrorSaved("");
+    setLoadingVisualSaved(true);
+    setGeneratedImagesSaved((p) => { const n = { ...p }; delete n[id]; return n; });
+    const styleDesc = STYLE_SUFFIX[visualStyle];
+    const prompt = `${saved.titre}. ${styleDesc}. Warm earthy cream palette deep forest green accents soft gold touches. Wellness brand. Professional. No text overlay.`;
+    try {
+      const res = await fetch("/api/ai/visual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ textContext: prompt, style: visualStyle, format: visualFormat, contentType: saved.category }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.predictionId) throw new Error(data.error || `HTTP ${res.status}`);
+      setExpandedVisualSaved(id);
+      setPredictionIdSaved(data.predictionId);
+    } catch (e) {
+      setVisualErrorSaved(`Erreur : ${e instanceof Error ? e.message : "inconnue"}`);
+      setLoadingVisualSaved(false);
+    }
   }
 
   async function generatePlan(idea: Idea, index: number) {
@@ -549,10 +666,10 @@ export default function ContentGenerator() {
                         <p className="text-xs text-outline">Génération du plan en cours…</p>
                       </div>
                     ) : (
-                      <pre className="whitespace-pre-wrap font-sans text-sm text-on-surface leading-relaxed">
+                      <div className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap break-words overflow-hidden">
                         {planContent[i]}
                         {loadingPlan === i && <span className="animate-pulse text-primary">▋</span>}
-                      </pre>
+                      </div>
                     )}
                   </div>
                 )}
@@ -701,30 +818,136 @@ export default function ContentGenerator() {
           </button>
 
           {savedOpen && (
-            <div className="space-y-2">
-              {savedIdeas.map((idea) => {
-                const cfg = TYPE_CONFIG[idea.type] || TYPE_CONFIG.photo;
+            <div className="space-y-3">
+              {savedIdeas.map((saved) => {
+                const cfg = TYPE_CONFIG[saved.type] || TYPE_CONFIG.photo;
+                const isPlanOpen = !!planOpenSaved[saved.id];
+                const isVisualOpen = expandedVisualSaved === saved.id;
+                const imgUrl = generatedImagesSaved[saved.id];
+
                 return (
-                  <div key={idea.id} className="flex items-start gap-3 bg-surface-container-low rounded-xl p-4">
-                    <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${cfg.color}`}>
-                      {cfg.emoji}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-on-surface">{idea.titre}</p>
-                      {idea.caption && (
-                        <p className="text-xs text-outline mt-0.5 line-clamp-1 italic">"{idea.caption}"</p>
-                      )}
-                      {idea.scriptIdea && (
-                        <p className="text-xs text-outline mt-0.5 line-clamp-1">💡 {idea.scriptIdea}</p>
-                      )}
-                      <p className="text-[10px] text-outline/50 mt-1">{idea.date}</p>
+                  <div key={saved.id} className="bg-surface-container-low rounded-2xl overflow-hidden">
+                    {/* Header */}
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-2 ${cfg.color}`}>{cfg.emoji} {cfg.label}</span>
+                          <p className="text-sm font-medium text-on-surface">{saved.titre}</p>
+                          {saved.caption && <p className="text-xs text-outline mt-1 line-clamp-1 italic">"{saved.caption}"</p>}
+                          {saved.scriptIdea && <p className="text-xs text-outline mt-1 line-clamp-1">💡 {saved.scriptIdea}</p>}
+                          <p className="text-[10px] text-outline/50 mt-1">{saved.date}</p>
+                        </div>
+                        <button onClick={() => deleteSavedIdea(saved.id)} className="shrink-0 text-xs text-outline/40 hover:text-error transition-colors duration-300 p-1">✕</button>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <button
+                          onClick={() => {
+                            setPlanOpenSaved((p) => ({ ...p, [saved.id]: !isPlanOpen }));
+                            if (!isPlanOpen && !planContentSaved[saved.id]) generatePlanSaved(saved);
+                          }}
+                          className={`py-1.5 px-4 rounded-full text-xs font-medium transition-all duration-400 ${isPlanOpen ? "bg-primary-fixed text-primary" : "bg-surface-container text-on-surface hover:bg-surface-container-high"}`}
+                        >
+                          {isPlanOpen ? "✕ Fermer" : "✦ Développer l'idée"}
+                        </button>
+                        {saved.type !== "video" && (
+                          <button
+                            onClick={() => {
+                              if (isVisualOpen) { setExpandedVisualSaved(null); } else { setExpandedVisualSaved(saved.id); setVisualErrorSaved(""); }
+                            }}
+                            className={`py-1.5 px-4 rounded-full text-xs font-medium transition-all duration-400 ${isVisualOpen ? "bg-primary-fixed text-primary" : "bg-surface-container text-on-surface hover:bg-surface-container-high"}`}
+                          >
+                            {isVisualOpen ? "✕ Fermer" : "🎨 Créer le visuel"}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <button
-                      onClick={() => deleteSavedIdea(idea.id)}
-                      className="shrink-0 text-xs text-outline/40 hover:text-error transition-colors duration-300 p-1"
-                    >
-                      ✕
-                    </button>
+
+                    {/* Plan panel */}
+                    {isPlanOpen && (
+                      <div className="border-t border-outline-variant/15 bg-surface-container-lowest px-4 py-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-outline uppercase tracking-widest">Plan d'action</p>
+                          {planContentSaved[saved.id] && loadingPlanSaved !== saved.id && (
+                            <div className="flex gap-2">
+                              {extractCaption(planContentSaved[saved.id]) && (
+                                <button onClick={async () => { await navigator.clipboard.writeText(extractCaption(planContentSaved[saved.id])); setPlanCopiedSaved(`${saved.id}_cap`); setTimeout(() => setPlanCopiedSaved(null), 2000); }}
+                                  className="text-xs py-1 px-3 rounded-full bg-primary-fixed text-primary hover:bg-primary-fixed/80 transition-all duration-400 font-medium">
+                                  {planCopiedSaved === `${saved.id}_cap` ? "✓ Caption copiée" : "📋 Copier la caption"}
+                                </button>
+                              )}
+                              <button onClick={async () => { await navigator.clipboard.writeText(planContentSaved[saved.id]); setPlanCopiedSaved(saved.id); setTimeout(() => setPlanCopiedSaved(null), 2000); }}
+                                className="text-xs py-1 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-all duration-400">
+                                {planCopiedSaved === saved.id ? "✓ Copié" : "Copier tout"}
+                              </button>
+                              <button onClick={() => generatePlanSaved(saved)} className="text-xs py-1 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-outline transition-all duration-400">↺</button>
+                            </div>
+                          )}
+                        </div>
+                        {loadingPlanSaved === saved.id && !planContentSaved[saved.id] ? (
+                          <div className="flex items-center gap-2 py-2"><div className="w-4 h-4 rounded-full border-2 border-primary/20 border-t-primary animate-spin shrink-0" /><p className="text-xs text-outline">Génération en cours…</p></div>
+                        ) : (
+                          <div className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap break-words overflow-hidden">
+                            {planContentSaved[saved.id]}
+                            {loadingPlanSaved === saved.id && <span className="animate-pulse text-primary">▋</span>}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Visual panel */}
+                    {isVisualOpen && saved.type !== "video" && (
+                      <div className="border-t border-outline-variant/15 bg-surface-container-lowest p-4 space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-xs text-outline mb-2">Format</p>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {FORMAT_OPTIONS.map((f) => (
+                                <button key={f.value} onClick={() => setVisualFormat(f.value)}
+                                  className={`py-2 px-2 rounded-xl text-xs font-medium transition-all duration-400 ${visualFormat === f.value ? "bg-primary-fixed text-primary" : "bg-surface-container text-on-surface hover:bg-surface-container-high"}`}>
+                                  {f.label}<span className={`block text-[10px] mt-0.5 ${visualFormat === f.value ? "text-primary/60" : "text-outline"}`}>{f.sub}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs text-outline mb-2">Style</p>
+                            <div className="grid grid-cols-1 gap-1.5">
+                              {STYLE_OPTIONS.map((s) => (
+                                <button key={s.value} onClick={() => setVisualStyle(s.value)}
+                                  className={`py-2 px-3 rounded-xl text-xs font-medium transition-all duration-400 text-left ${visualStyle === s.value ? "bg-primary-fixed text-primary" : "bg-surface-container text-on-surface hover:bg-surface-container-high"}`}>
+                                  {s.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        {!loadingVisualSaved && !imgUrl && (
+                          <button onClick={() => generateVisualSaved(saved)} className="w-full py-3 rounded-full bg-tertiary-fixed-dim text-[#3e2a00] font-semibold text-sm hover:scale-[1.02] transition-all duration-400">
+                            Générer le post →
+                          </button>
+                        )}
+                        {visualErrorSaved && <p className="text-sm text-error text-center">{visualErrorSaved}</p>}
+                        {loadingVisualSaved && expandedVisualSaved === saved.id && (
+                          <div className="py-3 space-y-2">
+                            <div className="flex justify-between"><p className="text-xs text-outline">{progressMsgSaved}</p><p className="text-xs font-medium text-primary">{progressSaved}%</p></div>
+                            <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                              <div className="h-full bg-primary-fixed rounded-full transition-all duration-1000 ease-out" style={{ width: `${progressSaved}%` }} />
+                            </div>
+                            <p className="text-[11px] text-outline/50 text-center">Nano Banana Pro génère ton image…</p>
+                          </div>
+                        )}
+                        {imgUrl && (
+                          <div className="space-y-2">
+                            <div className="rounded-xl overflow-hidden"><Image src={imgUrl} alt={saved.titre} width={800} height={800} className="w-full h-auto" unoptimized /></div>
+                            <div className="flex gap-2">
+                              <button onClick={() => downloadImage(imgUrl, 0)} className="flex-1 py-2 rounded-full bg-primary-fixed text-primary text-sm font-medium hover:bg-primary-fixed/80 transition-all duration-400">↓ Télécharger</button>
+                              <button onClick={() => generateVisualSaved(saved)} className="py-2 px-4 rounded-full bg-surface-container text-outline text-sm hover:bg-surface-container-high transition-all duration-400">↺</button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
