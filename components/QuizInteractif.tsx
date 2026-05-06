@@ -109,12 +109,12 @@ export default function QuizInteractif() {
           </div>
         </>
       ) : (
-        <div className="flex flex-col items-center text-center gap-6">
+        <div className="quiz-result flex flex-col items-center text-center gap-6">
           <div className={`text-xs uppercase tracking-widest font-bold ${result.color} mb-1`}>
             Recommandation personnalisée
           </div>
-          <div className={`inline-block px-6 py-3 rounded-full ${result.bg}`}>
-            <h5 className={`font-serif text-2xl md:text-3xl ${result.color}`}>{result.title}</h5>
+          <div className={`quiz-pill inline-block px-6 py-3 rounded-full ${result.bg} ${result.color}`}>
+            <h5 className={`font-serif text-2xl md:text-3xl ${result.color} relative z-10`}>{result.title}</h5>
           </div>
           <p className="text-on-surface-variant max-w-sm leading-relaxed">{result.description}</p>
           <div className="flex flex-col sm:flex-row gap-4 mt-2">
