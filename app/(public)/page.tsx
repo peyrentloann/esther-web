@@ -4,7 +4,6 @@ import QuizInteractif from "@/components/QuizInteractif";
 import Reveal from "@/components/motion/Reveal";
 import RevealStagger from "@/components/motion/RevealStagger";
 import HeroTitle from "@/components/motion/HeroTitle";
-import BloomingFlower from "@/components/motion/BloomingFlower";
 import SwipeCarousel from "@/components/SwipeCarousel";
 
 const TESTIMONIALS = [
@@ -91,30 +90,6 @@ export default function Home() {
             <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-primary-container rounded-full hidden md:flex items-center justify-center p-8 text-on-primary text-center font-serif text-sm leading-tight italic">
               Équilibre &amp; Sérénité au quotidien
             </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ── Fleur 3D ── */}
-      <section className="relative py-16 md:py-24 bg-surface overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none flex items-center justify-center"
-        >
-          <div
-            className="w-[800px] h-[800px] rounded-full blur-3xl opacity-50"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(238,192,104,0.5) 0%, transparent 70%)",
-            }}
-          />
-        </div>
-        <div className="relative max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
-          <BloomingFlower size={520} className="mb-12" />
-          <Reveal delay={2.8}>
-            <p className="font-serif text-2xl md:text-3xl text-primary italic max-w-2xl leading-relaxed">
-              Comme une fleur qui s&apos;ouvre, votre essence se révèle.
-            </p>
           </Reveal>
         </div>
       </section>
