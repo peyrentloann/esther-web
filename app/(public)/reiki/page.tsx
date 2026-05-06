@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Reveal from "@/components/motion/Reveal";
 import RevealStagger from "@/components/motion/RevealStagger";
+import TestimonialCarousel from "@/components/TestimonialCarousel";
 
 const BENEFITS = [
   { icon: "🧠", title: "Réduction du stress", desc: "Libérez les tensions accumulées pour un calme mental immédiat." },
@@ -188,19 +189,9 @@ export default function Reiki() {
       {/* ── Témoignages & Infos ── */}
       <section className="py-16 md:py-32 bg-surface px-6 md:px-12">
         <div className="max-w-7xl mx-auto space-y-12 md:space-y-24">
-          <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12" stagger={0.15}>
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="p-10 bg-surface-container rounded-2xl relative hover:-translate-y-2 hover:shadow-lg transition-all duration-500">
-                <span className="text-4xl text-on-tertiary-container absolute -top-5 left-8 bg-surface px-2">
-                  &ldquo;
-                </span>
-                <p className="italic text-on-surface-variant mb-8 leading-relaxed">{t.quote}</p>
-                <p className="text-xs tracking-widest font-bold text-primary uppercase">
-                  — {t.name}
-                </p>
-              </div>
-            ))}
-          </RevealStagger>
+          <Reveal>
+            <TestimonialCarousel testimonials={TESTIMONIALS} />
+          </Reveal>
 
           <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-8" stagger={0.12}>
             {[
