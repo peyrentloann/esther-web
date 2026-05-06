@@ -4,28 +4,38 @@ import QuizInteractif from "@/components/QuizInteractif";
 import Reveal from "@/components/motion/Reveal";
 import RevealStagger from "@/components/motion/RevealStagger";
 import HeroTitle from "@/components/motion/HeroTitle";
+import SwipeCarousel from "@/components/SwipeCarousel";
 
 const TESTIMONIALS = [
   {
-    quote: "Esther est la douceur incarnée. Sans jugement et dotée d'une grande empathie, elle me met rapidement en confiance. C'est pourquoi je l'appelle ma petite fée 🧚🏼‍♀️",
+    quote: "Esther est la douceur incarnée. De sa magnifique personne émane tant de bienveillance et d'ouverture. Sans jugement et dotée d'une grande empathie, elle me met rapidement en confiance. C'est pourquoi je l'appelle ma petite fée 🧚🏼‍♀️",
     name: "Marie Ève",
     city: "Reiki",
     color: "bg-secondary-fixed",
-    elevated: false,
   },
   {
-    quote: "Sa voix et son tambour me permettent de déloger ce qui est bloqué en moi. Une dose parfaite de béatitude et d'alignement.",
+    quote: "Esther est précieuse dans mon processus d'évolution intérieure. Sa voix et son tambour me permettent de déloger ce qui est bloqué en moi. Une dose parfaite de béatitude et d'alignement. 💜",
     name: "Claudine D.",
     city: "Reiki",
     color: "bg-primary-fixed",
-    elevated: true,
   },
   {
-    quote: "Sa voix de cœur et ses instruments sont sa couleur unique et si riche. Un équilibre inspirant « entre ciel et terre ».",
+    quote: "J'adore Esther, pour sa douceur, pour l'attention qu'elle porte à ce que je lui nomme. Un soin avec elle m'amène dans une profondeur, et sa voix céleste dans mon ressenti. 😌",
+    name: "Josée T.",
+    city: "Reiki & Retraite",
+    color: "bg-tertiary-fixed",
+  },
+  {
+    quote: "Ses soins se sont tellement enrichis en peu de temps. Sa voix de cœur et l'accompagnement de ses instruments sont sa couleur unique et si riche. Un équilibre inspirant « entre ciel et terre ».",
     name: "Estelle",
     city: "Formation Reiki",
-    color: "bg-tertiary-fixed",
-    elevated: false,
+    color: "bg-secondary-fixed",
+  },
+  {
+    quote: "Esther est une personne de cœur, vraie, qui possède une belle humilité et qui sait être à l'écoute des besoins des autres. Sa voix résonne au son de ses instruments et crée une ambiance propice à la guérison.",
+    name: "Marilou",
+    city: "Reiki",
+    color: "bg-primary-fixed",
   },
 ];
 
@@ -198,36 +208,35 @@ export default function Home() {
 
       {/* ── Témoignages ── */}
       <section className="py-24 bg-surface">
-        <div className="max-w-screen-2xl mx-auto px-6 md:px-12">
+        <div className="max-w-5xl mx-auto px-6 md:px-12">
           <Reveal>
             <h2 className="font-serif text-4xl text-center text-primary mb-16">
               Ce qu&apos;elles disent
             </h2>
           </Reveal>
-          <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-10" stagger={0.18}>
-            {TESTIMONIALS.map((t) => (
-              <div
-                key={t.name}
-                className={`${
-                  t.elevated
-                    ? "bg-surface-container-high md:-translate-y-8"
-                    : "bg-surface-container"
-                } p-10 rounded-3xl hover:-translate-y-2 hover:shadow-xl transition-all duration-500`}
-              >
-                <div className="flex gap-1 text-tertiary-fixed-dim mb-6 text-xl">★★★★★</div>
-                <p className="font-serif text-xl italic text-primary leading-relaxed mb-8">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-full ${t.color}`} />
-                  <div>
-                    <div className="font-bold text-primary">{t.name}</div>
-                    <div className="text-sm text-on-surface-variant">{t.city}</div>
+          <Reveal>
+            <SwipeCarousel
+              ariaLabel="Témoignages clients"
+              slides={TESTIMONIALS.map((t) => (
+                <div
+                  key={t.name}
+                  className="bg-surface-container p-10 md:p-12 rounded-3xl h-full"
+                >
+                  <div className="flex gap-1 text-tertiary-fixed-dim mb-6 text-xl">★★★★★</div>
+                  <p className="font-serif text-xl italic text-primary leading-relaxed mb-8">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-full ${t.color}`} />
+                    <div>
+                      <div className="font-bold text-primary">{t.name}</div>
+                      <div className="text-sm text-on-surface-variant">{t.city}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </RevealStagger>
+              ))}
+            />
+          </Reveal>
         </div>
       </section>
 
