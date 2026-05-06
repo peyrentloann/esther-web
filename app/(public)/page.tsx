@@ -212,7 +212,7 @@ export default function Home() {
 
       {/* ── Témoignages ── */}
       <section className="py-24 bg-surface">
-        <div className="max-w-5xl mx-auto px-6 md:px-12">
+        <div className="max-w-screen-2xl mx-auto px-6 md:px-12">
           <Reveal>
             <h2 className="font-serif text-4xl text-center text-primary mb-16">
               Ce qu&apos;elles disent
