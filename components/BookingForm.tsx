@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-type Service = "reiki" | "soin-hormonal" | null;
+type Service = "reiki" | "soin-hormonal" | "demandes-speciales" | null;
 type Format = "presentiel" | "en-ligne" | null;
 
 interface BookingData {
@@ -20,6 +20,7 @@ interface BookingData {
 const SERVICES = [
   { id: "reiki" as const, label: "Reiki", sub: "Harmonisation énergétique", icon: "✦" },
   { id: "soin-hormonal" as const, label: "Soin Hormonal", sub: "Équilibre & Féminité", icon: "♀" },
+  { id: "demandes-speciales" as const, label: "Demande spéciale", sub: "Accompagnement musical & soins", icon: "🕊️" },
 ];
 
 const FORMATS = [
