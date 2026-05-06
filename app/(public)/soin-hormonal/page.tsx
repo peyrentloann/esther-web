@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import Reveal from "@/components/motion/Reveal";
+import RevealStagger from "@/components/motion/RevealStagger";
 
 const BENEFITS = [
   { icon: "🌀", title: "Régulation des cycles", desc: "Retrouvez un cycle harmonieux et prévisible mois après mois." },
@@ -23,7 +25,7 @@ export default function SoinHormonal() {
       <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden px-6 pt-24"
         style={{ background: "linear-gradient(135deg, #874f48 0%, #C4837A 50%, #fdb5aa 100%)" }}
       >
-        <div className="relative z-10 text-center max-w-4xl mx-auto py-24">
+        <Reveal y={24} className="relative z-10 text-center max-w-4xl mx-auto py-24">
           <h1 className="font-serif text-5xl md:text-7xl text-white mb-6 leading-tight tracking-tight">
             Soin Hormonal avec{" "}
             <span className="italic font-normal">Esther Laframboise</span>
@@ -43,13 +45,13 @@ export default function SoinHormonal() {
               puberté à la post-ménopause.&rdquo;
             </p>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── C'est quoi ── */}
-      <section className="py-32 bg-secondary-fixed/20 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-          <div className="space-y-8">
+      <section className="py-16 md:py-32 bg-secondary-fixed/20 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center">
+          <Reveal className="space-y-8">
             <span className="text-4xl">♀</span>
             <h2 className="font-serif text-4xl md:text-5xl text-secondary">
               Reconnecter avec tes cycles
@@ -65,49 +67,49 @@ export default function SoinHormonal() {
                 stress pour créer un protocole unique, doux et respectueux de ta biologie.
               </p>
             </div>
-          </div>
-          <div className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-2xl bg-surface-container">
+          </Reveal>
+          <Reveal delay={0.2} y={40} className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-2xl bg-surface-container group">
             <Image
               src="/esther/soin-hormonal-ambiance/soin.jpg"
               alt="Soin Hormonal Esther"
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-[2000ms] group-hover:scale-110"
             />
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* ── Bienfaits ── */}
-      <section className="py-32 bg-surface px-6 md:px-12">
+      <section className="py-16 md:py-32 bg-surface px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-20 text-center max-w-2xl mx-auto">
+          <Reveal className="mb-20 text-center max-w-2xl mx-auto">
             <span className="text-sm uppercase tracking-widest text-outline mb-4 block font-label">
               Bienfaits du soin hormonal
             </span>
             <h2 className="font-serif text-4xl text-secondary">
               Pour chaque femme, à chaque étape
             </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          </Reveal>
+          <RevealStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.1}>
             {BENEFITS.map((b) => (
               <div
                 key={b.title}
-                className="bg-secondary-fixed/20 p-10 rounded-xl hover:bg-secondary-fixed/40 transition-colors duration-400 group"
+                className="bg-secondary-fixed/20 p-10 rounded-xl hover:bg-secondary-fixed/40 hover:-translate-y-1 transition-all duration-400 group"
               >
-                <span className="text-3xl mb-6 block group-hover:scale-110 transition-transform">
+                <span className="text-3xl mb-6 block group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
                   {b.icon}
                 </span>
                 <h3 className="font-serif text-xl text-secondary mb-3">{b.title}</h3>
                 <p className="text-on-surface-variant font-light">{b.desc}</p>
               </div>
             ))}
-          </div>
+          </RevealStagger>
         </div>
       </section>
 
       {/* ── CTA milieu ── */}
       <section id="rendez-vous" className="py-24 px-6" style={{ background: "#874f48" }}>
-        <div className="max-w-4xl mx-auto text-center space-y-10">
+        <Reveal className="max-w-4xl mx-auto text-center space-y-10">
           <h2 className="font-serif text-4xl md:text-5xl text-white">
             Prête à retrouver ton équilibre?
           </h2>
@@ -120,15 +122,15 @@ export default function SoinHormonal() {
           >
             Réserver maintenant
           </Link>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── Témoignages & Infos ── */}
-      <section className="py-32 bg-surface px-6 md:px-12">
-        <div className="max-w-7xl mx-auto space-y-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <section className="py-16 md:py-32 bg-surface px-6 md:px-12">
+        <div className="max-w-7xl mx-auto space-y-12 md:space-y-24">
+          <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-12" stagger={0.15}>
             {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="p-10 bg-secondary-fixed/20 rounded-2xl relative">
+              <div key={t.name} className="p-10 bg-secondary-fixed/20 rounded-2xl relative hover:-translate-y-2 hover:shadow-lg transition-all duration-500">
                 <span className="text-4xl text-secondary/40 absolute -top-5 left-8 bg-surface px-2">
                   &ldquo;
                 </span>
@@ -138,9 +140,9 @@ export default function SoinHormonal() {
                 </p>
               </div>
             ))}
-          </div>
+          </RevealStagger>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-8" stagger={0.12}>
             {[
               { icon: "⏱", title: "Durée", detail: "75 à 90 minutes par séance" },
               { icon: "📍", title: "Format", detail: "Présentiel ou en ligne" },
@@ -148,7 +150,7 @@ export default function SoinHormonal() {
             ].map((info) => (
               <div
                 key={info.title}
-                className="flex items-center gap-6 p-8 border border-secondary/20 rounded-xl"
+                className="flex items-center gap-6 p-8 border border-secondary/20 rounded-xl hover:border-secondary/40 hover:bg-secondary-fixed/10 transition-all duration-400"
               >
                 <span className="text-4xl">{info.icon}</span>
                 <div>
@@ -157,21 +159,23 @@ export default function SoinHormonal() {
                 </div>
               </div>
             ))}
-          </div>
+          </RevealStagger>
         </div>
       </section>
 
       {/* ── CTA final ── */}
       <section className="py-24 border-t border-secondary/10 text-center px-6">
-        <h2 className="font-serif text-3xl text-secondary mb-8 italic">
-          Ton cycle est une boussole. Apprends à le lire.
-        </h2>
-        <Link
-          href="/rendez-vous?service=soin-hormonal"
-          className="inline-block bg-secondary text-on-secondary px-14 py-6 rounded-full text-xl font-bold hover:scale-105 transition-all shadow-lg"
-        >
-          Réserver maintenant
-        </Link>
+        <Reveal>
+          <h2 className="font-serif text-3xl text-secondary mb-8 italic">
+            Ton cycle est une boussole. Apprends à le lire.
+          </h2>
+          <Link
+            href="/rendez-vous?service=soin-hormonal"
+            className="inline-block bg-secondary text-on-secondary px-14 py-6 rounded-full text-xl font-bold hover:scale-105 transition-all shadow-lg"
+          >
+            Réserver maintenant
+          </Link>
+        </Reveal>
       </section>
     </>
   );

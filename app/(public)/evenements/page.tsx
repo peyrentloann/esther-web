@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Reveal from "@/components/motion/Reveal";
+import RevealStagger from "@/components/motion/RevealStagger";
 
 const EVENTS = [
   {
@@ -52,21 +54,21 @@ export default function Evenements() {
   return (
     <>
       {/* ── Hero ── */}
-      <header className="relative min-h-[500px] flex items-center justify-center px-6 md:px-12 py-20 bg-surface pt-40">
-        <div className="relative z-10 max-w-4xl text-center">
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl tracking-tight text-primary leading-[1.1] mb-6">
+      <header className="relative min-h-[500px] flex items-center justify-center px-6 md:px-12 py-20 bg-surface pt-28 md:pt-40">
+        <Reveal y={24} className="relative z-10 max-w-4xl text-center">
+          <h1 className="font-serif text-3xl md:text-5xl lg:text-7xl tracking-tight text-primary leading-[1.1] mb-6">
             Événements &amp; Retraites
           </h1>
           <p className="text-xl md:text-2xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
             Soins de groupe, retraites bien-être, rencontres et collaborations pour nourrir
             l&apos;âme et le corps.
           </p>
-        </div>
+        </Reveal>
       </header>
 
       {/* ── Filtres ── */}
       <section className="max-w-screen-2xl mx-auto px-6 md:px-12 mb-12">
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <Reveal className="flex flex-wrap items-center justify-center gap-3">
           {FILTERS.map((f, i) => (
             <button
               key={f}
@@ -79,17 +81,17 @@ export default function Evenements() {
               {f}
             </button>
           ))}
-        </div>
+        </Reveal>
       </section>
 
       {/* ── Événements à venir ── */}
       <section className="max-w-screen-2xl mx-auto px-6 md:px-12 py-12">
-        <div className="flex items-center gap-8 mb-12">
+        <Reveal className="flex items-center gap-8 mb-12">
           <h2 className="font-serif text-4xl text-primary whitespace-nowrap">À venir</h2>
           <div className="h-px flex-grow bg-outline-variant/30 hidden md:block" />
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <RevealStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.15}>
           {EVENTS.map((event) => {
             const spotsLeft = event.maxSpots - event.spots;
             const isAlmostFull = spotsLeft <= 3;
@@ -97,7 +99,7 @@ export default function Evenements() {
             return (
               <div
                 key={event.slug}
-                className="group bg-surface-container-low rounded-xl overflow-hidden hover:scale-[1.02] transition-transform duration-500 flex flex-col"
+                className="group bg-surface-container-low rounded-xl overflow-hidden hover:-translate-y-2 hover:shadow-xl transition-all duration-500 flex flex-col h-full"
               >
                 {/* Image placeholder */}
                 <div className="relative h-64 overflow-hidden rounded-t-xl bg-surface-container-high">
@@ -143,16 +145,16 @@ export default function Evenements() {
               </div>
             );
           })}
-        </div>
+        </RevealStagger>
       </section>
 
       {/* ── Témoignages ── */}
       <section className="bg-surface-container py-24">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <RevealStagger className="max-w-screen-xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-8" stagger={0.18}>
           {TESTIMONIALS.map((t) => (
             <div
               key={t.name}
-              className="bg-surface p-10 rounded-2xl relative shadow-sm border border-outline-variant/10"
+              className="bg-surface p-10 rounded-2xl relative shadow-sm border border-outline-variant/10 hover:-translate-y-2 hover:shadow-xl transition-all duration-500"
             >
               <span className="text-6xl text-tertiary-fixed-dim/50 absolute -top-6 left-6 font-serif leading-none">
                 &ldquo;
@@ -166,12 +168,12 @@ export default function Evenements() {
               </cite>
             </div>
           ))}
-        </div>
+        </RevealStagger>
       </section>
 
       {/* ── CTA Newsletter ── */}
       <section className="max-w-screen-xl mx-auto px-6 md:px-12 my-24">
-        <div className="bg-primary rounded-[40px] py-16 px-8 md:px-20 text-center">
+        <Reveal y={40} className="bg-primary rounded-[40px] py-16 px-8 md:px-20 text-center">
           <h2 className="font-serif text-4xl md:text-5xl text-on-primary mb-4">
             Ne manque aucun événement
           </h2>
@@ -191,7 +193,7 @@ export default function Evenements() {
               S&apos;inscrire →
             </button>
           </form>
-        </div>
+        </Reveal>
       </section>
     </>
   );

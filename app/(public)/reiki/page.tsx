@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import Reveal from "@/components/motion/Reveal";
+import RevealStagger from "@/components/motion/RevealStagger";
 
 const BENEFITS = [
   { icon: "🧠", title: "Réduction du stress", desc: "Libérez les tensions accumulées pour un calme mental immédiat." },
@@ -29,9 +31,9 @@ export default function Reiki() {
       {/* ── Hero ── */}
       <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary-container to-primary px-6 pt-24">
         <div className="absolute inset-0 z-0">
-          <Image src="/esther/reiki-ambiance/soin.jpg" alt="" fill className="object-cover opacity-20" />
+          <Image src="/esther/reiki-ambiance/soin.jpg" alt="" fill className="object-cover opacity-20 ken-burns" />
         </div>
-        <div className="relative z-10 text-center max-w-4xl mx-auto py-24">
+        <Reveal y={24} className="relative z-10 text-center max-w-4xl mx-auto py-24">
           <h1 className="font-serif text-5xl md:text-7xl text-on-primary mb-6 leading-tight tracking-tight">
             Soins Reiki avec{" "}
             <span className="italic font-normal">Esther Laframboise</span>
@@ -51,13 +53,13 @@ export default function Reiki() {
               l&apos;énergie universelle par l&apos;imposition des mains.&rdquo;
             </p>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── C'est quoi le Reiki ── */}
-      <section className="py-32 bg-surface-container-low px-6 md:px-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-          <div className="space-y-8">
+      <section className="py-16 md:py-32 bg-surface-container-low px-6 md:px-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center">
+          <Reveal className="space-y-8">
             <span className="text-4xl text-on-tertiary-container">✦</span>
             <h2 className="font-serif text-4xl md:text-5xl text-primary">
               L&apos;art sacré de l&apos;énergie
@@ -73,61 +75,61 @@ export default function Reiki() {
                 ramenant votre être vers son état naturel d&apos;équilibre et de paix intérieure.
               </p>
             </div>
-          </div>
-          <div className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-2xl bg-surface-container">
+          </Reveal>
+          <Reveal delay={0.2} y={40} className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-2xl bg-surface-container group">
             <Image
               src="/esther/reiki-ambiance/soin.jpg"
               alt="Soin Reiki Esther"
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-[2000ms] group-hover:scale-110"
             />
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* ── Bienfaits ── */}
-      <section className="py-32 bg-surface px-6 md:px-12">
+      <section className="py-16 md:py-32 bg-surface px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-20 text-center max-w-2xl mx-auto">
+          <Reveal className="mb-20 text-center max-w-2xl mx-auto">
             <span className="text-sm uppercase tracking-widest text-outline mb-4 block font-label">
               Bienfaits du Reiki
             </span>
             <h2 className="font-serif text-4xl text-primary">
               Harmonisez votre corps et votre esprit
             </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          </Reveal>
+          <RevealStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.1}>
             {BENEFITS.map((b) => (
               <div
                 key={b.title}
-                className="bg-primary-fixed/30 p-10 rounded-xl hover:bg-primary-fixed/50 transition-colors duration-400 group"
+                className="bg-primary-fixed/30 p-10 rounded-xl hover:bg-primary-fixed/50 hover:-translate-y-1 transition-all duration-400 group"
               >
-                <span className="text-3xl mb-6 block group-hover:scale-110 transition-transform">
+                <span className="text-3xl mb-6 block group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
                   {b.icon}
                 </span>
                 <h3 className="font-serif text-xl text-primary mb-3">{b.title}</h3>
                 <p className="text-on-surface-variant font-light">{b.desc}</p>
               </div>
             ))}
-          </div>
+          </RevealStagger>
         </div>
       </section>
 
       {/* ── Outils ── */}
-      <section className="py-32 bg-surface-container-high px-6 md:px-12">
+      <section className="py-16 md:py-32 bg-surface-container-high px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-16">
+          <Reveal className="mb-16">
             <h2 className="font-serif text-4xl text-primary mb-4">Mes Outils Vibratoires</h2>
             <p className="text-on-surface-variant max-w-xl text-lg">
               Chaque soin est personnalisé grâce à l&apos;utilisation d&apos;instruments sacrés qui
               amplifient les fréquences de guérison.
             </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          </Reveal>
+          <RevealStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" stagger={0.1}>
             {TOOLS.map((t) => (
               <div
                 key={t.title}
-                className="bg-surface-container-lowest rounded-xl overflow-hidden group"
+                className="bg-surface-container-lowest rounded-xl overflow-hidden group hover:-translate-y-2 hover:shadow-xl transition-all duration-500"
               >
                 <div className={`aspect-square flex items-center justify-center text-6xl ${t.bg} group-hover:scale-110 transition-transform duration-700`}>
                   {t.icon}
@@ -138,13 +140,13 @@ export default function Reiki() {
                 </div>
               </div>
             ))}
-          </div>
+          </RevealStagger>
         </div>
       </section>
 
       {/* ── CTA milieu ── */}
       <section id="rendez-vous" className="py-24 bg-primary px-6">
-        <div className="max-w-4xl mx-auto text-center space-y-10">
+        <Reveal className="max-w-4xl mx-auto text-center space-y-10">
           <h2 className="font-serif text-4xl md:text-5xl text-on-primary">
             Prête à vivre l&apos;expérience?
           </h2>
@@ -157,15 +159,15 @@ export default function Reiki() {
           >
             Réserver maintenant
           </Link>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── Témoignages & Infos ── */}
-      <section className="py-32 bg-surface px-6 md:px-12">
-        <div className="max-w-7xl mx-auto space-y-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <section className="py-16 md:py-32 bg-surface px-6 md:px-12">
+        <div className="max-w-7xl mx-auto space-y-12 md:space-y-24">
+          <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12" stagger={0.15}>
             {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="p-10 bg-surface-container rounded-2xl relative">
+              <div key={t.name} className="p-10 bg-surface-container rounded-2xl relative hover:-translate-y-2 hover:shadow-lg transition-all duration-500">
                 <span className="text-4xl text-on-tertiary-container absolute -top-5 left-8 bg-surface px-2">
                   &ldquo;
                 </span>
@@ -175,9 +177,9 @@ export default function Reiki() {
                 </p>
               </div>
             ))}
-          </div>
+          </RevealStagger>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <RevealStagger className="grid grid-cols-1 md:grid-cols-3 gap-8" stagger={0.12}>
             {[
               { icon: "⏱", title: "Durée", detail: "60 à 90 minutes par soin" },
               { icon: "📍", title: "Format", detail: "Présentiel ou en ligne" },
@@ -185,7 +187,7 @@ export default function Reiki() {
             ].map((info) => (
               <div
                 key={info.title}
-                className="flex items-center gap-6 p-8 border border-outline-variant/20 rounded-xl"
+                className="flex items-center gap-6 p-8 border border-outline-variant/20 rounded-xl hover:border-primary/30 hover:bg-surface-container-low transition-all duration-400"
               >
                 <span className="text-4xl">{info.icon}</span>
                 <div>
@@ -194,21 +196,23 @@ export default function Reiki() {
                 </div>
               </div>
             ))}
-          </div>
+          </RevealStagger>
         </div>
       </section>
 
       {/* ── CTA final ── */}
       <section className="py-24 border-t border-primary/10 text-center px-6">
-        <h2 className="font-serif text-3xl text-primary mb-8 italic">
-          Prête à reconnecter avec votre essence?
-        </h2>
-        <Link
-          href="/rendez-vous?service=reiki"
-          className="inline-block bg-tertiary-fixed-dim text-on-tertiary-fixed px-14 py-6 rounded-full text-xl font-bold hover:scale-105 transition-all shadow-lg"
-        >
-          Réserver maintenant
-        </Link>
+        <Reveal>
+          <h2 className="font-serif text-3xl text-primary mb-8 italic">
+            Prête à reconnecter avec votre essence?
+          </h2>
+          <Link
+            href="/rendez-vous?service=reiki"
+            className="inline-block bg-tertiary-fixed-dim text-on-tertiary-fixed px-14 py-6 rounded-full text-xl font-bold hover:scale-105 transition-all shadow-lg"
+          >
+            Réserver maintenant
+          </Link>
+        </Reveal>
       </section>
     </>
   );
