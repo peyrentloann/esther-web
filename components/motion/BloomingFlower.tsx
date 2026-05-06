@@ -47,8 +47,8 @@ export default function BloomingFlower({
   return (
     <div className={className} style={{ width: size, height: size }}>
       <motion.svg
-        viewBox="-110 -110 220 220"
-        className="w-full h-full"
+        viewBox="-140 -140 280 280"
+        className="w-full h-full overflow-visible"
         initial={{ rotate: -12 }}
         animate={{ rotate: 0 }}
         transition={{ duration: 2, ease: EASE }}
