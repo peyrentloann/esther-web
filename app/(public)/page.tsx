@@ -4,6 +4,7 @@ import QuizInteractif from "@/components/QuizInteractif";
 import Reveal from "@/components/motion/Reveal";
 import RevealStagger from "@/components/motion/RevealStagger";
 import HeroTitle from "@/components/motion/HeroTitle";
+import BloomingFlower from "@/components/motion/BloomingFlower";
 import SwipeCarousel from "@/components/SwipeCarousel";
 
 const TESTIMONIALS = [
@@ -87,8 +88,12 @@ export default function Home() {
                 priority
               />
             </div>
-            <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-primary-container rounded-full hidden md:flex items-center justify-center p-8 text-on-primary text-center font-serif text-sm leading-tight italic">
-              Équilibre &amp; Sérénité au quotidien
+            <div
+              aria-hidden="true"
+              className="absolute -bottom-16 -left-16 md:-bottom-24 md:-left-24 pointer-events-none opacity-90 mix-blend-multiply"
+            >
+              <BloomingFlower size={280} className="md:hidden" />
+              <BloomingFlower size={420} className="hidden md:block" />
             </div>
           </Reveal>
         </div>
