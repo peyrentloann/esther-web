@@ -273,7 +273,7 @@ export default function Home() {
             </div>
             <div className="w-full md:w-1/2 h-full order-1 md:order-2 bg-on-secondary-fixed/5 p-12 flex justify-center items-center min-h-64">
               <div className="relative w-full max-w-sm aspect-square rounded-xl shadow-2xl rotate-3 overflow-hidden hover:rotate-0 hover:scale-105 transition-all duration-700">
-                <Image src="/esther/journal-mockup.jpg" alt="Journal Hormonal" fill className="object-cover" />
+                <Image src="/esther/journal/journal-04.jpg" alt="Journal Hormonal — Mon journal hormonal par Esther Laframboise" fill className="object-cover" />
               </div>
             </div>
           </div>

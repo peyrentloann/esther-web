@@ -1,5 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
+import SwipeCarousel from "@/components/SwipeCarousel";
+
+const GALLERY = [
+  { src: "/esther/journal/journal-02.jpg", alt: "Journal hormonal sur table en bois avec thé et fleurs séchées" },
+  { src: "/esther/journal/journal-03.jpg", alt: "Journal hormonal posé sur planche en bois avec lavande et eucalyptus" },
+  { src: "/esther/journal/journal-04.jpg", alt: "Journal hormonal sur table avec thé et lavande" },
+  { src: "/esther/journal/journal-05.jpg", alt: "Journal hormonal flat lay sur tissu écru" },
+  { src: "/esther/journal/journal-06.jpg", alt: "Journal hormonal mockup propre" },
+];
 
 const WHAT_INSIDE = [
   { icon: "🌙", title: "Suivi des cycles", desc: "Espace quotidien pour noter ta phase, tes symptômes et ton énergie." },
@@ -58,12 +67,13 @@ export default function JournalHormonal() {
 
           {/* Mockup */}
           <div className="flex justify-center">
-            <div className="relative w-72 aspect-square rounded-3xl shadow-2xl rotate-3 overflow-hidden">
+            <div className="relative w-full max-w-md aspect-[3/4] rounded-3xl shadow-2xl rotate-3 overflow-hidden bg-surface-container-low">
               <Image
-                src="/esther/journal-mockup.jpg"
-                alt="Journal Hormonal d'Esther Laframboise"
+                src="/esther/journal/journal-01.jpg"
+                alt="Journal Hormonal — Mon journal hormonal par Isabelle Fleury et Esther Laframboise"
                 fill
                 className="object-cover"
+                priority
               />
             </div>
           </div>
@@ -88,6 +98,38 @@ export default function JournalHormonal() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Galerie ── */}
+      <section className="py-24 bg-secondary-fixed/10 px-6 md:px-12 overflow-hidden">
+        <div className="max-w-screen-2xl mx-auto">
+          <div className="text-center mb-16 max-w-2xl mx-auto">
+            <span className="text-sm uppercase tracking-widest text-outline mb-4 block font-label">
+              En images
+            </span>
+            <h2 className="font-serif text-4xl text-secondary">
+              Un objet pensé pour t&apos;accompagner au quotidien
+            </h2>
+          </div>
+          <SwipeCarousel
+            ariaLabel="Galerie photos du journal hormonal"
+            desktopPerView={3}
+            slides={GALLERY.map((img) => (
+              <div
+                key={img.src}
+                className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-lg bg-surface-container"
+              >
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
+            ))}
+          />
         </div>
       </section>
 
