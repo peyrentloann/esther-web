@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServiceClient } from "@/lib/supabase";
 import { isGoogleConnected } from "@/lib/google-calendar";
+import SetupNeeded from "@/components/admin/SetupNeeded";
 
 export const dynamic = "force-dynamic";
 
@@ -11,12 +12,33 @@ const SERVICE_LABEL: Record<string, { label: string; classes: string }> = {
 };
 
 export default async function Dashboard() {
-  const supabase = getServiceClient();
   const now = new Date();
+  const today = now.toLocaleDateString("fr-CA", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  let supabase;
+  try {
+    supabase = getServiceClient();
+  } catch (e) {
+    return (
+      <>
+        <header className="mb-12">
+          <h2 className="font-serif text-4xl text-primary mb-2">Bonjour Esther 👋</h2>
+          <p className="text-outline capitalize">{today}</p>
+        </header>
+        <SetupNeeded message={(e as Error).message} />
+      </>
+    );
+  }
+
   const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const [{ count: weekCount }, { count: pendingCount }, { count: totalClients }, upcomingRes, googleOk] = await Promise.all([
+  const [weekRes, pendingRes, clientsRes, upcomingRes] = await Promise.all([
     supabase
       .from("appointments")
       .select("*", { count: "exact", head: true })
@@ -38,22 +60,28 @@ export default async function Dashboard() {
       .neq("status", "cancelled")
       .order("starts_at", { ascending: true })
       .limit(5),
-    isGoogleConnected(),
   ]);
 
+  // If table doesn't exist (or any error), show setup screen
+  if (weekRes.error || upcomingRes.error) {
+    return (
+      <>
+        <header className="mb-12">
+          <h2 className="font-serif text-4xl text-primary mb-2">Bonjour Esther 👋</h2>
+          <p className="text-outline capitalize">{today}</p>
+        </header>
+        <SetupNeeded message={weekRes.error?.message || upcomingRes.error?.message} />
+      </>
+    );
+  }
+
+  const googleOk = await isGoogleConnected();
   const upcoming = upcomingRes.data ?? [];
 
-  const today = now.toLocaleDateString("fr-CA", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
   const stats = [
-    { label: "RDV cette semaine", value: weekCount ?? 0, icon: "📅" },
-    { label: "En attente de confirmation", value: pendingCount ?? 0, icon: "⏳" },
-    { label: "Nouvelles clientes (30j)", value: totalClients ?? 0, icon: "👥" },
+    { label: "RDV cette semaine", value: weekRes.count ?? 0, icon: "📅" },
+    { label: "En attente de confirmation", value: pendingRes.count ?? 0, icon: "⏳" },
+    { label: "Nouvelles clientes (30j)", value: clientsRes.count ?? 0, icon: "👥" },
     {
       label: "Google Calendar",
       value: googleOk ? "✓" : "⚠",

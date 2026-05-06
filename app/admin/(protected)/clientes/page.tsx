@@ -1,4 +1,5 @@
 import { getServiceClient } from "@/lib/supabase";
+import SetupNeeded from "@/components/admin/SetupNeeded";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,20 @@ const SERVICE_LABEL: Record<string, string> = {
 };
 
 export default async function ClientesPage() {
-  const supabase = getServiceClient();
+  let supabase;
+  try {
+    supabase = getServiceClient();
+  } catch (e) {
+    return (
+      <>
+        <header className="mb-12">
+          <h2 className="font-serif text-4xl text-primary mb-2">Clientes</h2>
+        </header>
+        <SetupNeeded message={(e as Error).message} />
+      </>
+    );
+  }
+
   const { data: appointments, error } = await supabase
     .from("appointments")
     .select("client_email, client_name, client_phone, service, starts_at")
@@ -27,10 +41,12 @@ export default async function ClientesPage() {
 
   if (error) {
     return (
-      <div className="bg-error-container text-error p-8 rounded-2xl">
-        <h2 className="font-bold mb-2">Erreur</h2>
-        <p className="text-sm">{error.message}</p>
-      </div>
+      <>
+        <header className="mb-12">
+          <h2 className="font-serif text-4xl text-primary mb-2">Clientes</h2>
+        </header>
+        <SetupNeeded message={error.message} />
+      </>
     );
   }
 

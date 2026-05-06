@@ -53,9 +53,18 @@ async function getAuthorizedClient() {
 }
 
 export async function isGoogleConnected() {
-  const supabase = getServiceClient();
-  const { data } = await supabase.from("settings").select("key").eq("key", TOKEN_KEY).maybeSingle();
-  return !!data;
+  try {
+    const supabase = getServiceClient();
+    const { data, error } = await supabase
+      .from("settings")
+      .select("key")
+      .eq("key", TOKEN_KEY)
+      .maybeSingle();
+    if (error) return false;
+    return !!data;
+  } catch {
+    return false;
+  }
 }
 
 export async function disconnectGoogle() {
