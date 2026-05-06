@@ -102,16 +102,16 @@ export default function Home() {
           className="absolute inset-0 pointer-events-none flex items-center justify-center"
         >
           <div
-            className="w-[800px] h-[800px] rounded-full blur-3xl opacity-40"
+            className="w-[800px] h-[800px] rounded-full blur-3xl opacity-50"
             style={{
               background:
-                "radial-gradient(circle, rgba(238,192,104,0.4) 0%, transparent 70%)",
+                "radial-gradient(circle, rgba(238,192,104,0.5) 0%, transparent 70%)",
             }}
           />
         </div>
         <div className="relative max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
-          <BloomingFlower size={520} className="mb-8" />
-          <Reveal delay={2.5}>
+          <BloomingFlower size={520} className="mb-12" />
+          <Reveal delay={2.8}>
             <p className="font-serif text-2xl md:text-3xl text-primary italic max-w-2xl leading-relaxed">
               Comme une fleur qui s&apos;ouvre, votre essence se révèle.
             </p>
